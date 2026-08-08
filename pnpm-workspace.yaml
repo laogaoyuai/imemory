@@ -1,0 +1,14 @@
+packages:
+  - apps/*
+  - packages/*
+
+overrides:
+  '@react-native/metro-config': 0.85.3
+  core-js-compat: 3.49.0
+  react-native-worklets: 0.8.3
+  terser: 5.49.0
+
+allowBuilds:
+  '@swc/core': true
+  esbuild: true
+  unrs-resolver: true

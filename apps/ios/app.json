@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "拾光内容库",
+    "slug": "atlas-content-library",
+    "version": "0.0.1",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "scheme": "atlas",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.atlas.contentlibrary",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "用于选择要收藏的图片和视频。",
+        "NSPhotoLibraryAddUsageDescription": "用于将内容保存到相册。",
+        "NSMicrophoneUsageDescription": "用于录制要发布的音频内容。"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-audio",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "允许拾光访问相册，以添加图片和视频。",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ],
+      "expo-sqlite"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

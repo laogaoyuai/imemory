@@ -1,0 +1,24 @@
+{
+  "name": "atlas-content-library",
+  "version": "0.0.1",
+  "private": true,
+  "packageManager": "pnpm@11.10.0",
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "scripts": {
+    "dev:ios": "pnpm --filter @atlas/ios start",
+    "ios": "pnpm --filter @atlas/ios ios",
+    "typecheck": "tsc -p packages/core/tsconfig.json --noEmit && tsc -p apps/ios/tsconfig.json --noEmit",
+    "test": "jest --config packages/core/jest.config.cjs --runInBand",
+    "lint": "pnpm -r --if-present lint"
+  },
+  "devDependencies": {
+    "@swc/core": "^1.13.5",
+    "@swc/jest": "^0.2.39",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.18.0",
+    "jest": "^30.1.3",
+    "typescript": "6.0.3"
+  }
+}
