@@ -41,7 +41,7 @@ export default function TeamPeopleScreen() {
   return (
     <Screen>
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.nav}><Pressable onPress={() => router.back()} style={styles.back}><Ionicons color={colors.ink} name="chevron-back" size={22} /></Pressable><Text style={styles.navTitle}>{roleLabel(role)}列表</Text><View style={styles.back} /></View>
+        <View style={styles.nav}><Pressable onPress={() => { if (router.canGoBack()) router.back(); else router.replace({ pathname: '/team/[name]', params: { name } }); }} style={styles.back}><Ionicons color={colors.ink} name="chevron-back" size={22} /></Pressable><Text style={styles.navTitle}>{roleLabel(role)}列表</Text><View style={styles.back} /></View>
         <Text style={styles.project}>{teamName}</Text>
         <View style={styles.search}><Ionicons color={colors.muted} name="search" size={17} /><TextInput onChangeText={setSearch} placeholder="搜索用户" placeholderTextColor={colors.muted} style={styles.searchInput} value={search} /></View>
         <View style={styles.list}>

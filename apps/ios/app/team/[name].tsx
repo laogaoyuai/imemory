@@ -42,9 +42,8 @@ export default function TeamContentScreen() {
         keyExtractor={(item) => item.id}
         ListHeaderComponent={<View style={styles.header}>
           <View style={styles.nav}>
-            <Pressable hitSlop={12} onPress={() => router.back()} style={styles.navBack}><Ionicons color={colors.ink} name="chevron-back" size={22} /></Pressable>
-            <Text style={styles.navTitle}>项目主页</Text>
-            <View style={styles.navBack} />
+            <Pressable hitSlop={12} onPress={() => { if (router.canGoBack()) router.back(); else router.replace('/team'); }} style={styles.navBack}><Ionicons color={colors.ink} name="chevron-back" size={22} /></Pressable>
+            <Text pointerEvents="none" style={styles.navTitle}>项目主页</Text>
           </View>
           <View style={styles.titleRow}>
             <View style={styles.titleGroup}>
@@ -91,7 +90,7 @@ const styles = StyleSheet.create({
   header: { paddingHorizontal: 22, paddingTop: 10, paddingBottom: 18 },
   nav: { height: 58, marginHorizontal: -4, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   navBack: { width: 40, height: 40, borderRadius: 14, backgroundColor: colors.card, alignItems: 'center', justifyContent: 'center' },
-  navTitle: { color: colors.ink, fontSize: 16, fontWeight: '700' },
+  navTitle: { position: 'absolute', left: 0, right: 0, textAlign: 'center', color: colors.ink, fontSize: 16, fontWeight: '700' },
   title: { color: colors.ink, fontSize: 30, lineHeight: 38, fontWeight: '800' },
   titleGroup: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 },
   titleAvatar: { width: 44, height: 44, borderRadius: 13 },

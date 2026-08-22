@@ -1,6 +1,9 @@
 import {
+  contentCommentSchema,
   contentItemSchema,
+  type ContentComment,
   type ContentItem,
+  type CommentRepository,
   type ContentRepository,
   type ContentVersion,
   type VersionedContentRepository,
@@ -20,7 +23,9 @@ interface VersionRow {
   payload: string;
 }
 
-export class SQLiteContentRepository implements VersionedContentRepository {
+interface CommentRow { payload: string }
+
+export class SQLiteContentRepository implements VersionedContentRepository, CommentRepository {
   private databasePromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
   async list(): Promise<ContentItem[]> {
@@ -92,6 +97,39 @@ export class SQLiteContentRepository implements VersionedContentRepository {
     return row ? JSON.parse(row.payload) as ContentVersion : null;
   }
 
+  async listComments(contentId: string): Promise<ContentComment[]> {
+    const database = await this.database();
+    const rows = await database.getAllAsync<CommentRow>(
+      'SELECT payload FROM content_comments WHERE content_id = ? ORDER BY created_at ASC',
+      contentId,
+    );
+    return rows.map((row) => contentCommentSchema.parse(JSON.parse(row.payload)));
+  }
+
+  async saveComment(comment: ContentComment): Promise<void> {
+    const value = contentCommentSchema.parse(comment);
+    const database = await this.database();
+    await database.runAsync(
+      `INSERT OR REPLACE INTO content_comments (id, content_id, author_name, created_at, payload)
+       VALUES (?, ?, ?, ?, ?)`,
+      value.id,
+      value.contentId,
+      value.authorName,
+      value.createdAt,
+      JSON.stringify(value),
+    );
+  }
+
+  async toggleCommentLike(commentId: string): Promise<ContentComment | null> {
+    const database = await this.database();
+    const row = await database.getFirstAsync<CommentRow>('SELECT payload FROM content_comments WHERE id = ?', commentId);
+    if (!row) return null;
+    const current = contentCommentSchema.parse(JSON.parse(row.payload));
+    const updated = { ...current, isLiked: !current.isLiked, likeCount: Math.max(0, current.likeCount + (current.isLiked ? -1 : 1)) };
+    await database.runAsync('UPDATE content_comments SET payload = ? WHERE id = ?', JSON.stringify(updated), commentId);
+    return updated;
+  }
+
   async updateVersionStatus(versionId: string, status: ContentVersion['status']): Promise<void> {
     const database = await this.database();
     const row = await database.getFirstAsync<VersionRow>('SELECT payload FROM content_versions WHERE id = ?', versionId);
@@ -100,9 +138,15 @@ export class SQLiteContentRepository implements VersionedContentRepository {
     await database.runAsync('UPDATE content_versions SET status = ?, payload = ? WHERE id = ?', status, JSON.stringify(version), versionId);
   }
 
+  async removeVersion(versionId: string): Promise<void> {
+    await (await this.database()).runAsync('DELETE FROM content_versions WHERE id = ?', versionId);
+  }
+
   async remove(id: string): Promise<void> {
     const database = await this.database();
     await database.runAsync('DELETE FROM content_items WHERE id = ?', id);
+    await database.runAsync('DELETE FROM content_versions WHERE content_id = ?', id);
+    await database.runAsync('DELETE FROM content_comments WHERE content_id = ?', id);
   }
 
   private database(): Promise<SQLite.SQLiteDatabase> {
@@ -136,6 +180,15 @@ export class SQLiteContentRepository implements VersionedContentRepository {
       );
       CREATE INDEX IF NOT EXISTS idx_content_versions_content
         ON content_versions(content_id, submitted_at DESC);
+      CREATE TABLE IF NOT EXISTS content_comments (
+        id TEXT PRIMARY KEY NOT NULL,
+        content_id TEXT NOT NULL,
+        author_name TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        payload TEXT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_content_comments_content
+        ON content_comments(content_id, created_at ASC);
     `);
     return database;
   }

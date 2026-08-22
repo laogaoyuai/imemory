@@ -143,6 +143,42 @@ export class ContentService {
     return restored;
   }
 
+  async deleteVersion(contentId: string, versionId: string): Promise<ContentItem | null> {
+    const repository = this.versionRepository();
+    const current = this.snapshot.items.find((item) => item.id === contentId) ?? await this.repository.get(contentId);
+    if (!repository || !current) return null;
+    const versions = await repository.listVersions(contentId);
+    const target = versions.find((version) => version.id === versionId);
+    if (!target) return current;
+    if (versions.length <= 1) {
+      await this.repository.remove(contentId);
+      this.patch((state) => { state.items = state.items.filter((item) => item.id !== contentId); });
+      return null;
+    }
+
+    const latest = versions[0];
+    if (!latest) return current;
+    const isCurrent = target.version === current.version;
+    const isLatest = target.version === latest.version;
+    let updated: ContentItem | null = current;
+    if (isCurrent && isLatest) {
+      const previous = versions.find((version) => version.id !== target.id);
+      if (previous) updated = await this.restoreVersion(current, previous);
+    } else if (isCurrent && !isLatest) {
+      updated = await this.restoreVersion(current, latest);
+    }
+
+    await repository.removeVersion(versionId);
+    if (updated && updated !== current) {
+      await this.repository.save(updated);
+      this.patch((state) => {
+        const index = state.items.findIndex((item) => item.id === contentId);
+        if (index >= 0) state.items[index] = updated as ContentItem;
+      });
+    }
+    return updated;
+  }
+
   async toggleFavorite(id: string): Promise<void> {
     const current = this.snapshot.items.find((item) => item.id === id);
     if (!current) return;
@@ -189,7 +225,7 @@ export class ContentService {
 
   private versionRepository(): VersionedContentRepository | null {
     const repository = this.repository as Partial<VersionedContentRepository>;
-    return typeof repository.listVersions === 'function' && typeof repository.getVersion === 'function'
+    return typeof repository.listVersions === 'function' && typeof repository.getVersion === 'function' && typeof repository.removeVersion === 'function'
       ? this.repository as VersionedContentRepository
       : null;
   }
@@ -209,6 +245,10 @@ export class ContentService {
       status: 'approved',
       snapshot: item,
     });
+  }
+
+  private async restoreVersion(current: ContentItem, version: ContentVersion): Promise<ContentItem> {
+    return { ...version.snapshot, id: current.id, updatedAt: this.dependencies.now().toISOString() };
   }
 }
 

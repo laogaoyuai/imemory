@@ -5,13 +5,31 @@ import { useEffect, useRef } from 'react';
 
 import { colors, radius } from '../theme';
 
-export function AudioAttachmentRow({ attachment, onCoverPress }: { attachment: Attachment; onCoverPress?: () => void }) {
+export function AudioAttachmentRow({ attachment, onCoverPress, autoPlay = false, onEnded }: { attachment: Attachment; onCoverPress?: () => void; autoPlay?: boolean; onEnded?: () => void }) {
   const player = useAudioPlayer(attachment.uri, { updateInterval: 250 });
   const status = useAudioPlayerStatus(player);
   const playing = status.playing;
   const duration = status.duration || (attachment.durationMs ?? 0) / 1000;
   const progress = duration ? Math.min(1, status.currentTime / duration) : 0;
   const rotation = useRef(new Animated.Value(0)).current;
+  const endedRef = useRef(false);
+
+  useEffect(() => {
+    if (autoPlay) {
+      if (status.didJustFinish) void player.seekTo(0);
+      player.play();
+    }
+    else player.pause();
+  }, [autoPlay, player, status.didJustFinish]);
+
+  useEffect(() => {
+    if (status.didJustFinish && !endedRef.current) {
+      endedRef.current = true;
+      onEnded?.();
+    } else if (!status.didJustFinish) {
+      endedRef.current = false;
+    }
+  }, [onEnded, status.didJustFinish]);
 
   useEffect(() => {
     if (playing) {

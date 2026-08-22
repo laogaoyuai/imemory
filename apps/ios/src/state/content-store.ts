@@ -3,6 +3,7 @@ import {
   i18n,
   queryContent,
   type ContentDraft,
+  type ContentComment,
   type ContentFilter,
   type ContentItem,
   type ContentVersion,
@@ -11,7 +12,8 @@ import { create } from 'zustand';
 
 import { SQLiteContentRepository } from '../data/sqlite-content-repository';
 
-const service = new ContentService(new SQLiteContentRepository(), {
+const repository = new SQLiteContentRepository();
+const service = new ContentService(repository, {
   id: () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`,
   now: () => new Date(),
 });
@@ -36,9 +38,13 @@ interface ContentStore {
   getVersion: (versionId: string) => Promise<ContentVersion | null>;
   setVersionStatus: (versionId: string, status: ContentVersion['status']) => Promise<void>;
   rollback: (id: string, versionId: string) => Promise<ContentItem>;
+  deleteVersion: (id: string, versionId: string) => Promise<ContentItem | null>;
   toggleFavorite: (id: string) => Promise<void>;
   toggleLike: (id: string) => Promise<void>;
   incrementMetric: (id: string, metric: 'readCount' | 'shareCount' | 'commentCount') => Promise<void>;
+  listComments: (contentId: string) => Promise<ContentComment[]>;
+  addComment: (comment: ContentComment) => Promise<void>;
+  toggleCommentLike: (commentId: string) => Promise<ContentComment | null>;
   remove: (id: string) => Promise<void>;
   getById: (id: string) => ContentItem | undefined;
 }
@@ -118,6 +124,11 @@ export const useContentStore = create<ContentStore>((set, get) => ({
     set(snapshot());
     return item;
   },
+  deleteVersion: async (id, versionId) => {
+    const item = await service.deleteVersion(id, versionId);
+    set(snapshot());
+    return item;
+  },
   toggleFavorite: async (id) => {
     await service.toggleFavorite(id);
     set(snapshot());
@@ -130,6 +141,9 @@ export const useContentStore = create<ContentStore>((set, get) => ({
     await service.incrementMetric(id, metric);
     set(snapshot());
   },
+  listComments: (contentId) => repository.listComments(contentId),
+  addComment: (comment) => repository.saveComment(comment),
+  toggleCommentLike: (commentId) => repository.toggleCommentLike(commentId),
   remove: async (id) => {
     await service.remove(id);
     set(snapshot());

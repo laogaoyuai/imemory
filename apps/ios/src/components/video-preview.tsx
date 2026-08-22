@@ -7,11 +7,17 @@ import { Dimensions, Modal, PanResponder, Pressable, StyleSheet, Text, View } fr
 
 import { colors, radius } from '../theme';
 
-export function VideoCover({ attachment, width, height, onPress }: { attachment: Attachment; width: number; height: number; onPress: () => void }) {
+export function VideoCover({ attachment, width, height, onPress, autoPlay = false, onEnded }: { attachment: Attachment; width: number; height: number; onPress: () => void; autoPlay?: boolean; onEnded?: () => void }) {
   const player = useVideoPlayer(attachment.uri, (videoPlayer) => {
     videoPlayer.pause();
     videoPlayer.currentTime = 0;
   });
+
+  useEventListener(player, 'playToEnd', onEnded ?? (() => undefined));
+  useEffect(() => {
+    if (autoPlay) player.play();
+    else player.pause();
+  }, [autoPlay, player]);
 
   return (
     <Pressable accessibilityLabel="播放视频" onPress={onPress} style={[styles.cover, { width, height }]}>
@@ -21,7 +27,7 @@ export function VideoCover({ attachment, width, height, onPress }: { attachment:
   );
 }
 
-export function VideoViewerModal({ attachment, visible, onClose }: { attachment: Attachment; visible: boolean; onClose: () => void }) {
+export function VideoViewerModal({ attachment, visible, onClose, onEnded }: { attachment: Attachment; visible: boolean; onClose: () => void; onEnded?: () => void }) {
   const { width, height } = Dimensions.get('window');
   const player = useVideoPlayer(attachment.uri, (videoPlayer) => {
     videoPlayer.pause();
@@ -30,6 +36,8 @@ export function VideoViewerModal({ attachment, visible, onClose }: { attachment:
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [trackWidth, setTrackWidth] = useState(0);
+
+  useEventListener(player, 'playToEnd', onEnded ?? (() => undefined));
 
   useEventListener(player, 'timeUpdate', ({ currentTime: nextTime }) => {
     setCurrentTime(nextTime);

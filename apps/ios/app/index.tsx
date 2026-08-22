@@ -2,11 +2,11 @@ import { Ionicons } from '@expo/vector-icons';
 import type { ContentFilter } from '@atlas/core';
 import * as Haptics from 'expo-haptics';
 import { Redirect, router } from 'expo-router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
+  Modal,
   Pressable,
   ScrollView,
   Share,
@@ -32,9 +32,6 @@ const filters: { value: ContentFilter; label: string }[] = [
   { value: 'article', label: '文章' },
   { value: 'video', label: '视频' },
   { value: 'audio', label: '音频' },
-  { value: 'file', label: '文件' },
-  { value: 'liked', label: '点赞' },
-  { value: 'favorite', label: '收藏' },
 ];
 
 export default function LibraryScreen() {
@@ -60,6 +57,7 @@ export default function LibraryScreen() {
   const authHydrated = useAuthStore((state) => state.hydrated);
   const hydrateAuth = useAuthStore((state) => state.hydrate);
   const hydrateTeams = useTeamStore((state) => state.hydrate);
+  const [cityPanelVisible, setCityPanelVisible] = useState(false);
 
   useEffect(() => {
     void hydrate();
@@ -76,6 +74,13 @@ export default function LibraryScreen() {
 
   const tagOptions = Array.from(new Set(items.flatMap((item) => item.tags))).slice(0, 16);
   const locationOptions = Array.from(new Set(items.map((item) => item.location).filter(Boolean))).slice(0, 12);
+  const cityOptions = Array.from(new Set([...locationOptions, '北京', '上海', '广州', '深圳', '杭州', '合肥']));
+  const selectCity = (city: string) => {
+    if (locations.length === 1 && locations[0] === city) { setCityPanelVisible(false); return; }
+    locations.forEach((location) => toggleLocation(location));
+    toggleLocation(city);
+    setCityPanelVisible(false);
+  };
 
   return (
     <Screen>
@@ -86,23 +91,26 @@ export default function LibraryScreen() {
         keyboardDismissMode="on-drag"
         ListHeaderComponent={
           <>
-            <View style={styles.search}>
-              <Ionicons color={colors.muted} name="search" size={19} />
-              <TextInput
-                accessibilityLabel="搜索内容"
-                autoCorrect={false}
-                onChangeText={setKeyword}
-                placeholder="搜索标题、正文或标签"
-                placeholderTextColor={colors.muted}
-                returnKeyType="search"
-                style={styles.searchInput}
-                value={keyword}
-              />
-              {keyword ? (
-                <Pressable hitSlop={10} onPress={() => setKeyword('')}>
-                  <Ionicons color={colors.muted} name="close-circle" size={18} />
-                </Pressable>
-              ) : null}
+            <View style={styles.searchRow}>
+              <Pressable onPress={() => setCityPanelVisible(true)} style={[styles.cityButton, locations.length > 0 && styles.cityButtonSelected]}><Ionicons color={locations.length > 0 ? colors.card : colors.blue} name="location-outline" size={16} /><Text numberOfLines={1} style={[styles.cityButtonText, locations.length > 0 && styles.cityButtonTextSelected]}>{locations[0] ?? '全国'}</Text></Pressable>
+              <View style={styles.search}>
+                <Ionicons color={colors.muted} name="search" size={19} />
+                <TextInput
+                  accessibilityLabel="搜索内容"
+                  autoCorrect={false}
+                  onChangeText={setKeyword}
+                  placeholder="搜索标题、正文或标签"
+                  placeholderTextColor={colors.muted}
+                  returnKeyType="search"
+                  style={styles.searchInput}
+                  value={keyword}
+                />
+                {keyword ? (
+                  <Pressable hitSlop={10} onPress={() => setKeyword('')}>
+                    <Ionicons color={colors.muted} name="close-circle" size={18} />
+                  </Pressable>
+                ) : null}
+              </View>
             </View>
 
             {tagOptions.length > 0 ? (
@@ -127,32 +135,6 @@ export default function LibraryScreen() {
                 </ScrollView>
               </View>
             ) : null}
-
-            <View style={styles.locationSection}>
-              <View style={styles.tagHeading}>
-                <Text style={styles.tagTitle}>所在位置</Text>
-                {locations.length > 0 ? (
-                  <Pressable hitSlop={8} onPress={() => locations.forEach((location) => toggleLocation(location))}>
-                    <Text style={styles.clearTags}>清除</Text>
-                  </Pressable>
-                ) : null}
-              </View>
-              {locationOptions.length > 0 ? (
-                <ScrollView contentContainerStyle={styles.tags} horizontal showsHorizontalScrollIndicator={false}>
-                  {locationOptions.map((location) => {
-                    const selected = locations.includes(location);
-                    return (
-                      <Pressable key={location} onPress={() => toggleLocation(location)} style={[styles.locationChip, selected && styles.locationChipSelected]}>
-                        <Ionicons color={selected ? colors.card : colors.blue} name="location-outline" size={13} />
-                        <Text style={[styles.locationText, selected && styles.locationTextSelected]}>{location}</Text>
-                      </Pressable>
-                    );
-                  })}
-                </ScrollView>
-              ) : (
-                <Text style={styles.locationEmpty}>发布内容时添加位置，即可在这里筛选</Text>
-              )}
-            </View>
 
             <ScrollView
               contentContainerStyle={styles.filters}
@@ -196,7 +178,7 @@ export default function LibraryScreen() {
             onFavorite={() => void toggleFavorite(item.id)}
             onLike={() => void toggleLike(item.id)}
             onShare={() => void Share.share({ message: `${item.title}\n${item.body}` }).then(() => incrementMetric(item.id, 'shareCount'))}
-            onComment={() => Alert.alert('评论', '评论功能将在团队协作版本开放。')}
+            onComment={() => void incrementMetric(item.id, 'readCount').then(() => router.push({ pathname: '/content/[id]', params: { id: item.id } }))}
             onPress={() => void incrementMetric(item.id, 'readCount').then(() => router.push({ pathname: '/content/[id]', params: { id: item.id } }))}
           />
         )}
@@ -204,14 +186,21 @@ export default function LibraryScreen() {
       />
 
       <BottomNav />
+      <Modal animationType="slide" onRequestClose={() => setCityPanelVisible(false)} transparent visible={cityPanelVisible}>
+        <View style={styles.modalBackdrop}><View style={styles.citySheet}><View style={styles.cityHeader}><View><Text style={styles.cityTitle}>同城</Text><Text style={styles.cityHint}>选择城市筛选同城内容</Text></View><Pressable onPress={() => setCityPanelVisible(false)}><Ionicons color={colors.muted} name="close" size={22} /></Pressable></View><ScrollView contentContainerStyle={styles.cityOptions}>{cityOptions.map((city) => { const selected = locations.length === 1 && locations[0] === city; return <Pressable key={city} onPress={() => selectCity(city)} style={[styles.cityOption, selected && styles.cityOptionSelected]}><Ionicons color={selected ? colors.card : colors.blue} name="location-outline" size={16} /><Text style={[styles.cityOptionText, selected && styles.cityOptionTextSelected]}>{city}</Text>{selected ? <Ionicons color={colors.card} name="checkmark" size={16} /> : null}</Pressable>; })}</ScrollView>{locations.length ? <Pressable onPress={() => { locations.forEach((location) => toggleLocation(location)); setCityPanelVisible(false); }} style={styles.clearCity}><Text style={styles.clearCityText}>清除同城筛选</Text></Pressable> : null}</View></View>
+      </Modal>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   list: { paddingBottom: 126 },
+  searchRow: { marginHorizontal: 20, flexDirection: 'row', alignItems: 'center', gap: 8 },
+  cityButton: { height: 48, paddingHorizontal: 11, borderRadius: radius.medium, flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: colors.blueSoft },
+  cityButtonSelected: { backgroundColor: colors.blue },
+  cityButtonText: { color: colors.blue, fontSize: 13, fontWeight: '800' },
+  cityButtonTextSelected: { color: colors.card },
   tagSection: { marginTop: 14 },
-  locationSection: { marginTop: 4 },
   tagHeading: { paddingHorizontal: 22, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   tagTitle: { color: colors.secondary, fontSize: 12, fontWeight: '700' },
   clearTags: { color: colors.accent, fontSize: 12, fontWeight: '700' },
@@ -220,14 +209,10 @@ const styles = StyleSheet.create({
   tagChipSelected: { backgroundColor: colors.sage },
   tagChipText: { color: colors.sage, fontSize: 12, fontWeight: '600' },
   tagChipTextSelected: { color: colors.card },
-  locationChip: { paddingHorizontal: 11, paddingVertical: 7, borderRadius: radius.pill, backgroundColor: colors.blueSoft, flexDirection: 'row', alignItems: 'center', gap: 5 },
-  locationChipSelected: { backgroundColor: colors.blue },
-  locationText: { color: colors.blue, fontSize: 12, fontWeight: '600' },
-  locationTextSelected: { color: colors.card },
-  locationEmpty: { color: colors.muted, fontSize: 12, paddingHorizontal: 22, paddingTop: 9, paddingBottom: 10 },
   search: {
     height: 48,
-    marginHorizontal: 20,
+    flex: 1,
+    marginHorizontal: 0,
     paddingHorizontal: 15,
     borderRadius: radius.medium,
     backgroundColor: colors.card,
@@ -238,6 +223,18 @@ const styles = StyleSheet.create({
     borderColor: colors.line,
   },
   searchInput: { color: colors.ink, fontSize: 15, flex: 1, height: '100%' },
+  modalBackdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(20,20,16,0.42)' },
+  citySheet: { maxHeight: '72%', padding: 20, borderTopLeftRadius: 24, borderTopRightRadius: 24, backgroundColor: colors.card },
+  cityHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  cityTitle: { color: colors.ink, fontSize: 20, fontWeight: '800' },
+  cityHint: { marginTop: 4, color: colors.muted, fontSize: 12 },
+  cityOptions: { gap: 8, paddingTop: 16, paddingBottom: 8 },
+  cityOption: { minHeight: 42, paddingHorizontal: 12, borderRadius: radius.medium, flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.paper },
+  cityOptionSelected: { backgroundColor: colors.blue },
+  cityOptionText: { flex: 1, color: colors.blue, fontSize: 13, fontWeight: '700' },
+  cityOptionTextSelected: { color: colors.card },
+  clearCity: { alignItems: 'center', paddingVertical: 11, borderRadius: radius.pill, backgroundColor: colors.blueSoft },
+  clearCityText: { color: colors.blue, fontSize: 13, fontWeight: '800' },
   filters: { gap: 9, paddingHorizontal: 20, paddingVertical: 17 },
   filter: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: radius.pill, backgroundColor: colors.card },
   filterSelected: { backgroundColor: colors.ink },

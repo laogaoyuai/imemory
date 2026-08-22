@@ -2,7 +2,7 @@
   "expo": {
     "name": "拾光内容库",
     "slug": "atlas-content-library",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "scheme": "atlas",

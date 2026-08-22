@@ -24,7 +24,7 @@ import { Screen } from '../src/components/screen';
 import { AudioAttachmentRow } from '../src/components/audio-attachment-row';
 import { ImageViewerModal } from '../src/components/image-viewer-modal';
 import { VideoCover, VideoViewerModal } from '../src/components/video-preview';
-import { deleteImportedFiles, persistFile, pickDocuments, pickImagesOrVideo } from '../src/media/importer';
+import { deleteImportedFiles, persistFile, pickImagesOrVideo } from '../src/media/importer';
 import { useContentStore } from '../src/state/content-store';
 import { useAuthStore } from '../src/state/auth-store';
 import { useTeamStore } from '../src/state/team-store';
@@ -35,6 +35,7 @@ export default function ComposeScreen() {
   const update = useContentStore((state) => state.update);
   const items = useContentStore((state) => state.items);
   const getVersion = useContentStore((state) => state.getVersion);
+  const listVersions = useContentStore((state) => state.listVersions);
   const user = useAuthStore((state) => state.user);
   const teams = useTeamStore((state) => state.teams);
   const followedTeamNames = useTeamStore((state) => state.followedTeamNames);
@@ -46,6 +47,7 @@ export default function ComposeScreen() {
   const [teamNames, setTeamNames] = useState<string[]>(['无']);
   const [isPublic, setIsPublic] = useState(true);
   const [versionInput, setVersionInput] = useState('0.0.1');
+  const [latestVersion, setLatestVersion] = useState<string | null>(null);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [recording, setRecording] = useState(false);
@@ -69,12 +71,14 @@ export default function ComposeScreen() {
       selectedProject?.adminNames.includes(user.name)
     ),
   );
-  const versionBase = currentItem?.version ?? editingItem?.version ?? '0.0.1';
+  const versionBase = latestVersion ?? currentItem?.version ?? editingItem?.version ?? '0.0.1';
   const nextVersion = editingItem ? incrementPatch(versionBase) : '0.0.1';
-  const editingHistoricalVersion = sourceVersionId && sourceItem && sourceItem.version !== currentItem?.version;
+  const editingHistoricalVersion = Boolean(sourceVersionId && sourceItem && sourceItem.version !== latestVersion);
+  const baseVersion = editingHistoricalVersion && sourceItem ? sourceItem.version : versionBase;
+  const baseVersionLabel = `${baseVersion}${baseVersion === currentItem?.version ? '（当前版本）' : ''}`;
   const versionHint = editingHistoricalVersion
-    ? `基于历史版本 ${sourceItem.version}`
-    : `基于最新版本 ${versionBase}`;
+    ? `基于历史版本 ${baseVersionLabel}`
+    : `基于最新版本 ${baseVersionLabel}`;
   const tags = useMemo(
     () => tagInput.split(/[,，#\s]+/).map((tag) => tag.trim()).filter(Boolean).slice(0, 5),
     [tagInput],
@@ -103,6 +107,15 @@ export default function ComposeScreen() {
     void getVersion(sourceVersionId).then((version) => setSourceItem(version?.snapshot ?? null));
   }, [getVersion, sourceVersionId]);
   useEffect(() => {
+    if (!editingItem) { setLatestVersion(null); return; }
+    let active = true;
+    setLatestVersion(null);
+    void listVersions(editingItem.id).then((versions) => {
+      if (active) setLatestVersion(versions[0]?.version ?? currentItem?.version ?? editingItem.version);
+    });
+    return () => { active = false; };
+  }, [currentItem?.version, editingItem?.id, listVersions]);
+  useEffect(() => {
     if (!editingItem || initialized.current || (sourceVersionId && (!sourceItem || !currentItem))) return;
     initialized.current = true;
     setTitle(editingItem.title);
@@ -114,6 +127,9 @@ export default function ComposeScreen() {
     setVersionInput(requestedVersion ?? incrementPatch(currentItem?.version ?? editingItem.version));
     setTagInput(editingItem.tags.map((tag) => `#${tag}`).join(' '));
   }, [currentItem, editingItem, requestedVersion, sourceItem, sourceVersionId]);
+  useEffect(() => {
+    if (editingItem && latestVersion && !requestedVersion) setVersionInput(incrementPatch(latestVersion));
+  }, [editingItem, latestVersion, requestedVersion]);
   useEffect(() => {
     const selectedProjects = teamNames.filter((team) => team !== '无');
     if (!selectedProjects.length) {
@@ -163,15 +179,6 @@ export default function ComposeScreen() {
     }
   };
 
-  const addDocuments = async () => {
-    try {
-      const selected = await pickDocuments();
-      setAttachments((current) => [...current, ...selected].slice(0, 20));
-    } catch (error) {
-      Alert.alert('无法添加文件', error instanceof Error ? error.message : '请稍后重试');
-    }
-  };
-
   const recordAudio = async () => {
     try {
       if (recording) {
@@ -212,15 +219,6 @@ export default function ComposeScreen() {
     }
   };
 
-  const addLink = () => {
-    Alert.prompt('添加链接', '请输入链接地址', (value) => {
-      const link = value?.trim();
-      if (!link) return;
-      const normalized = /^https?:\/\//i.test(link) ? link : `https://${link}`;
-      setBody((current) => `${current.trim()}${current.trim() ? '\n\n' : ''}${normalized}`);
-    }, 'plain-text');
-  };
-
   const selectAudioCover = async (attachment: Attachment) => {
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 0.85 });
     if (result.canceled || !result.assets[0]) return;
@@ -258,6 +256,10 @@ export default function ComposeScreen() {
       Alert.alert('版本号格式错误', '请输入符合 x.x.x 规则的版本号。');
       return;
     }
+    if (editingItem && !isVersionAtLeast(versionInput.trim(), nextVersion)) {
+      Alert.alert('版本号不能使用', `版本号不能小于自动版本 ${nextVersion}。`);
+      return;
+    }
     setSubmitting(true);
     try {
       const draft = { title, body, tags, location, teamNames, isPublic, attachments, authorName: user?.name };
@@ -275,7 +277,7 @@ export default function ComposeScreen() {
     <Screen>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
         <View style={styles.nav}>
-          <Pressable hitSlop={12} onPress={() => router.back()} style={styles.navButton}>
+          <Pressable hitSlop={12} onPress={() => { if (router.canGoBack()) router.back(); else router.replace('/'); }} style={styles.navButton}>
             <Ionicons color={colors.ink} name="close" size={23} />
           </Pressable>
           <Text style={styles.navTitle}>{editingItem ? '编辑内容' : '新建收录'}</Text>
@@ -436,19 +438,19 @@ export default function ComposeScreen() {
             <View style={styles.versionRow}>
               <View style={styles.publicCopy}>
                 <Text style={styles.publicTitle}>版本号</Text>
-                <Text style={styles.publicHint}>{versionHint} → 创作 {versionInput || nextVersion}</Text>
+                <Text style={styles.publicHint}>{versionHint} 创作</Text>
               </View>
               <View style={styles.versionValue}>
                 <TextInput
-                  editable={canEditVersion && Boolean(sourceVersionId)}
+                  editable={canEditVersion}
                   keyboardType="numbers-and-punctuation"
                   maxLength={20}
                   onChangeText={setVersionInput}
-                  selectTextOnFocus={canEditVersion && Boolean(sourceVersionId)}
-                  style={[styles.versionInput, !(canEditVersion && sourceVersionId) && styles.versionInputDisabled]}
+                  selectTextOnFocus={canEditVersion}
+                  style={[styles.versionInput, !canEditVersion && styles.versionInputDisabled]}
                   value={versionInput || nextVersion}
                 />
-                {!sourceVersionId ? <Text style={styles.versionLock}>当前编辑自动递增</Text> : !canEditVersion ? <Text style={styles.versionLock}>仅可查看</Text> : null}
+                {canEditVersion ? <Text style={styles.versionLock}>默认递增1，可自定义改大</Text> : <Text style={styles.versionLock}>仅可查看</Text>}
               </View>
             </View>
           ) : null}
@@ -468,8 +470,6 @@ export default function ComposeScreen() {
           <View style={styles.actions}>
             <ToolButton icon="images-outline" label="图片/视频" onPress={() => void addMedia()} />
             <ToolButton icon={recording ? 'stop-circle-outline' : 'mic-outline'} label={recording ? '停止录音' : '录音'} onPress={() => void recordAudio()} />
-            <ToolButton icon="document-attach-outline" label="文档/文件" onPress={() => void addDocuments()} />
-            <ToolButton icon="link-outline" label="链接" onPress={addLink} />
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -502,6 +502,18 @@ function attachmentKey(attachment: Attachment): string {
 function incrementPatch(version: string): string {
   const [major, minor, patch] = version.split('.').map(Number);
   return `${major || 0}.${minor || 0}.${(patch || 0) + 1}`;
+}
+
+function isVersionAtLeast(next: string, base: string): boolean {
+  const nextParts = next.split('.').map(Number);
+  const baseParts = base.split('.').map(Number);
+  if (nextParts.length !== 3 || baseParts.length !== 3 || nextParts.some((part) => !Number.isInteger(part) || part < 0) || baseParts.some((part) => !Number.isInteger(part) || part < 0)) return false;
+  for (let index = 0; index < 3; index += 1) {
+    const nextPart = nextParts[index] ?? 0;
+    const basePart = baseParts[index] ?? 0;
+    if (nextPart !== basePart) return nextPart > basePart;
+  }
+  return true;
 }
 
 function formatRecordingDuration(seconds: number): string {

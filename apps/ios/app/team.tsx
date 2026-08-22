@@ -34,7 +34,7 @@ export default function TeamScreen() {
   return (
     <Screen>
       <View style={styles.nav}>
-        <Pressable hitSlop={12} onPress={() => router.back()} style={styles.back}><Ionicons color={colors.ink} name="chevron-back" size={23} /></Pressable>
+        <Pressable hitSlop={12} onPress={() => { if (router.canGoBack()) router.back(); else router.replace('/'); }} style={styles.back}><Ionicons color={colors.ink} name="chevron-back" size={23} /></Pressable>
         <Text style={styles.navTitle}>团队项目</Text>
         <Pressable onPress={() => setCreating(true)} style={styles.createButton}><Ionicons color={colors.card} name="add" size={18} /><Text style={styles.createText}>创建</Text></Pressable>
       </View>

@@ -41,7 +41,7 @@ export default function TeamManageScreen() {
   return (
     <Screen>
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.nav}><Pressable onPress={() => router.back()} style={styles.back}><Ionicons color={colors.ink} name="chevron-back" size={22} /></Pressable><Text style={styles.navTitle}>管理项目</Text><View style={styles.back} /></View>
+        <View style={styles.nav}><Pressable onPress={() => { if (router.canGoBack()) router.back(); else router.replace({ pathname: '/team/[name]', params: { name } }); }} style={styles.back}><Ionicons color={colors.ink} name="chevron-back" size={22} /></Pressable><Text style={styles.navTitle}>管理项目</Text><View style={styles.back} /></View>
         <Text style={styles.project}>{teamName}</Text>
         <Text style={styles.hint}>项目主可设置管理员、成员和粉丝；管理员可设置成员和粉丝。</Text>
         <View style={styles.fieldCard}>

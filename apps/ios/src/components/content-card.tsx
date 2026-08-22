@@ -1,15 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
-import type { ContentItem } from '@atlas/core';
+import type { ContentComment, ContentItem } from '@atlas/core';
 import { router } from 'expo-router';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { ImageStyle } from 'react-native';
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { ImageViewerModal } from './image-viewer-modal';
 import { VideoCover, VideoViewerModal } from './video-preview';
 import { AudioAttachmentRow } from './audio-attachment-row';
 import { colors, radius, shadow } from '../theme';
 import { useAuthStore } from '../state/auth-store';
+import { useContentStore } from '../state/content-store';
 
 const kindIcon: Record<ContentItem['kind'], keyof typeof Ionicons.glyphMap> = {
   note: 'sparkles-outline',
@@ -21,6 +22,8 @@ const kindIcon: Record<ContentItem['kind'], keyof typeof Ionicons.glyphMap> = {
   audio: 'headset-outline',
   file: 'document-attach-outline',
 };
+
+type CommentSlide = { comment: ContentComment; showLikes: boolean; duration: number };
 
 export function ContentCard({
   item,
@@ -47,6 +50,7 @@ export function ContentCard({
   const audio = item.attachments.find((attachment) => attachment.kind === 'audio');
   const projectName = item.teamNames.find((team) => team !== '无');
   const author = useAuthStore((state) => state.users.find((user) => user.name === item.authorName));
+  const listComments = useContentStore((state) => state.listComments);
   const description = articlePreview(item.excerpt || item.body);
   const visualCount = imageAttachments.length;
   const gridColumns = visualCount === 2 || visualCount === 4 ? 2 : 3;
@@ -56,6 +60,69 @@ export function ContentCard({
   const [contentWidth, setContentWidth] = useState(0);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const [videoVisible, setVideoVisible] = useState(false);
+  const [comments, setComments] = useState<ContentComment[]>([]);
+  const [commentIndex, setCommentIndex] = useState(0);
+  const [displayCommentIndex, setDisplayCommentIndex] = useState(0);
+  const [previousCommentIndex, setPreviousCommentIndex] = useState<number | null>(null);
+  const commentTransition = useRef(new Animated.Value(1)).current;
+  const commentHasRendered = useRef(false);
+
+  useEffect(() => {
+    let active = true;
+    if (!item.commentCount) {
+      setComments([]);
+      return () => { active = false; };
+    }
+    void listComments(item.id).then((result) => { if (active) setComments(result); }).catch(() => { if (active) setComments([]); });
+    return () => { active = false; };
+  }, [item.commentCount, item.id, listComments]);
+
+  const commentSlides = useMemo<CommentSlide[]>(() => {
+    // A single comment should remain static. Without this guard, a liked
+    // comment would be added to both the high-like and earliest queues and
+    // appear to rotate back to itself.
+    if (comments.length === 1) {
+      const comment = comments[0];
+      return comment
+        ? [{ comment, showLikes: comment.likeCount > 0, duration: 1.5 }]
+        : [];
+    }
+    const top = comments.filter((comment) => comment.likeCount > 0).slice().sort((left, right) => right.likeCount - left.likeCount || new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime()).slice(0, 3).map((comment, index) => ({ comment, showLikes: true, duration: [4, 3, 2][index] ?? 1.5 }));
+    const earliest = comments.slice().sort((left, right) => new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime()).slice(0, 10).map((comment) => ({ comment, showLikes: false, duration: 1.5 }));
+    return [...top, ...earliest];
+  }, [comments]);
+
+  useEffect(() => {
+    setCommentIndex(0);
+    setDisplayCommentIndex(0);
+    setPreviousCommentIndex(null);
+    commentTransition.setValue(1);
+    commentHasRendered.current = false;
+  }, [commentSlides]);
+
+  useEffect(() => {
+    if (!commentSlides.length) return;
+    const targetIndex = commentIndex % commentSlides.length;
+    if (!commentHasRendered.current) {
+      commentHasRendered.current = true;
+      setDisplayCommentIndex(targetIndex);
+      return;
+    }
+    if (targetIndex === displayCommentIndex) return;
+    setPreviousCommentIndex(displayCommentIndex);
+    setDisplayCommentIndex(targetIndex);
+    commentTransition.setValue(0);
+    Animated.timing(commentTransition, { toValue: 1, duration: 500, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start(() => setPreviousCommentIndex(null));
+  }, [commentIndex, commentSlides.length, commentTransition, displayCommentIndex]);
+
+  useEffect(() => {
+    if (commentSlides.length <= 1) return;
+    const current = commentSlides[commentIndex % commentSlides.length];
+    const timer = setTimeout(() => setCommentIndex((index) => (index + 1) % commentSlides.length), (current?.duration ?? 1) * 1000);
+    return () => clearTimeout(timer);
+  }, [commentIndex, commentSlides]);
+
+  const renderCommentLine = (slide: CommentSlide | undefined) => slide ? <View style={styles.commentPreviewLine}><Text ellipsizeMode="tail" numberOfLines={1} style={styles.commentPreviewText}>{slide.comment.authorName}: {slide.comment.body}</Text>{slide.showLikes ? <View style={styles.commentLikes}><Text style={styles.commentLikeCount}>{slide.comment.likeCount}</Text><Ionicons color={colors.accent} name="thumbs-up" size={12} /></View> : null}</View> : <Text style={styles.commentPreviewText}>抢沙发</Text>;
 
   const stop = (action?: () => void) => (event: { stopPropagation: () => void }) => {
     event.stopPropagation();
@@ -186,6 +253,16 @@ export function ContentCard({
           </View>
         ) : null}
 
+        <View style={styles.commentPreview}>
+          <Pressable onPress={stop(onComment)} style={styles.commentPreviewCopy}>
+            <View style={styles.commentAnimated}>
+              {previousCommentIndex !== null ? <Animated.View style={[styles.commentLayer, { opacity: commentTransition.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }), transform: [{ translateY: commentTransition.interpolate({ inputRange: [0, 1], outputRange: [0, -12] }) }] }]}>{renderCommentLine(commentSlides[previousCommentIndex])}</Animated.View> : null}
+              <Animated.View style={[styles.commentLayer, { opacity: commentTransition, transform: [{ translateY: commentTransition.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }] }]}>{renderCommentLine(commentSlides[displayCommentIndex])}</Animated.View>
+            </View>
+          </Pressable>
+          <Pressable onPress={stop(onComment)} style={styles.commentPreviewAction}><Ionicons color={colors.muted} name="chatbubble-outline" size={15} /><Text style={styles.commentPreviewCount}>{item.commentCount}</Text></Pressable>
+        </View>
+
         <View style={styles.footer}>
           <Text style={styles.date}>{formatDate(item.createdAt)}</Text>
           <View style={styles.metrics}>
@@ -193,7 +270,6 @@ export function ContentCard({
             <MetricButton icon={item.isLiked ? 'heart' : 'heart-outline'} count={item.likeCount} label="点赞" active={item.isLiked} onPress={stop(onLike)} />
             <MetricButton icon={item.isFavorite ? 'star' : 'star-outline'} count={item.favoriteCount} label="收藏" active={item.isFavorite} onPress={stop(onFavorite)} />
             <MetricButton icon="arrow-redo-outline" count={item.shareCount} label="转发" onPress={stop(onShare)} />
-            <MetricButton icon="chatbubble-outline" count={item.commentCount} label="评论" onPress={stop(onComment)} />
           </View>
         </View>
       </View>
@@ -325,6 +401,16 @@ const styles = StyleSheet.create({
     marginTop: 10,
     minHeight: 22,
   },
+  commentPreview: { minHeight: 30, marginTop: 10, paddingHorizontal: 9, borderRadius: radius.small, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.paper },
+  commentPreviewCopy: { flex: 1, minWidth: 0, height: 18, justifyContent: 'center' },
+  commentAnimated: { flex: 1, minWidth: 0, height: 18, position: 'relative' },
+  commentLayer: { position: 'absolute', left: 0, right: 0, top: 0 },
+  commentPreviewLine: { flexDirection: 'row', alignItems: 'center', height: 18, minWidth: 0, gap: 6 },
+  commentPreviewText: { flex: 1, minWidth: 0, color: colors.secondary, fontSize: 11, lineHeight: 18 },
+  commentLikes: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+  commentLikeCount: { color: colors.accent, fontSize: 10, fontWeight: '700' },
+  commentPreviewAction: { height: 18, marginLeft: 8, flexDirection: 'row', alignItems: 'center', gap: 3 },
+  commentPreviewCount: { color: colors.muted, fontSize: 10, fontWeight: '600' },
   metrics: { flexDirection: 'row', alignItems: 'center', gap: 9, marginLeft: 8 },
   metric: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   metricCount: { color: colors.muted, fontSize: 10, fontWeight: '600' },

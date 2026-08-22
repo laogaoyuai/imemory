@@ -8,6 +8,7 @@ import { BottomNav } from '../src/components/bottom-nav';
 import { Screen } from '../src/components/screen';
 import { useContentStore } from '../src/state/content-store';
 import { useAuthStore } from '../src/state/auth-store';
+import { useCollectionStore } from '../src/state/collection-store';
 import { colors, radius } from '../src/theme';
 
 type ProfileFilter = 'personal' | 'project' | 'liked' | 'favorite' | 'comment';
@@ -18,10 +19,14 @@ export default function MeScreen() {
   const hydrateAuth = useAuthStore((state) => state.hydrate);
   const updateProfile = useAuthStore((state) => state.updateProfile);
   const logout = useAuthStore((state) => state.logout);
+  const collections = useCollectionStore((state) => state.collections);
+  const hydrateCollections = useCollectionStore((state) => state.hydrate);
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
   useEffect(() => { void hydrateAuth(); }, [hydrateAuth]);
+  useEffect(() => { void hydrateCollections(); }, [hydrateCollections]);
+  const personalCollections = user ? collections.filter((collection) => collection.ownerName === user.name) : [];
   const authoredItems = user ? items.filter((item) => item.authorName === user.name) : [];
   const personalItems = authoredItems.filter((item) => item.teamNames.every((team) => team === '无'));
   const projectItems = authoredItems.filter((item) => item.teamNames.some((team) => team !== '无'));
@@ -35,10 +40,6 @@ export default function MeScreen() {
   return (
     <Screen>
       <View style={styles.content}>
-        <Text style={styles.eyebrow}>YOUR SPACE</Text>
-        <Text style={styles.title}>我的</Text>
-        <Text style={styles.subtitle}>这是你的私人内容库</Text>
-
         <Pressable onPress={() => { if (!user) { router.push('/auth'); return; } setName(user.name); setBio(user.bio); setEditing(true); }} style={styles.profileCard}>
           <View style={styles.avatar}>{user?.avatarUri ? <Image source={{ uri: user.avatarUri }} style={styles.avatarImage} /> : <Ionicons color={colors.accent} name="person" size={28} />}</View>
           <View style={styles.profileText}><Text style={styles.profileTitle}>{user?.name ?? '登录 / 注册'}</Text><Text style={styles.profileHint}>{user?.phone ?? '使用手机号管理你的内容'}</Text></View>
@@ -62,6 +63,12 @@ export default function MeScreen() {
             label="团队项目"
             detail="邀请成员一起整理"
             onPress={() => router.push('/team')}
+          />
+          <MenuRow
+            icon="albums-outline"
+            label="个人合集"
+            detail={`${personalCollections.length} 个合集，持续更新同类内容`}
+            onPress={() => router.push('/collections')}
           />
         </View>
 
@@ -113,22 +120,19 @@ function Stat({ label, value, onPress }: { label: string; value: number; onPress
 }
 
 const styles = StyleSheet.create({
-  content: { paddingHorizontal: 22, paddingTop: 22, paddingBottom: 120 },
-  eyebrow: { color: colors.accent, fontSize: 10, letterSpacing: 2, fontWeight: '800' },
-  title: { color: colors.ink, fontSize: 36, fontWeight: '800', marginTop: 4 },
-  subtitle: { color: colors.secondary, fontSize: 14, marginTop: 4 },
-  profileCard: { marginTop: 30, flexDirection: 'row', alignItems: 'center', gap: 13, padding: 15, backgroundColor: colors.card, borderRadius: radius.large },
+  content: { paddingHorizontal: 22, paddingTop: 14, paddingBottom: 120 },
+  profileCard: { marginTop: 0, flexDirection: 'row', alignItems: 'center', gap: 13, padding: 15, backgroundColor: colors.card, borderRadius: radius.large },
   avatar: { width: 50, height: 50, borderRadius: 17, backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   avatarImage: { width: '100%', height: '100%' },
   profileText: { flex: 1, gap: 4 },
   profileTitle: { color: colors.ink, fontSize: 16, fontWeight: '700' },
   profileHint: { color: colors.muted, fontSize: 12 },
-  stats: { backgroundColor: colors.ink, borderRadius: radius.large, marginTop: 14, paddingTop: 15, paddingBottom: 18 },
-  statsTitle: { color: colors.card, fontSize: 14, fontWeight: '700', paddingHorizontal: 16, marginBottom: 14 },
+  stats: { backgroundColor: colors.sageSoft, borderRadius: radius.large, marginTop: 14, paddingTop: 15, paddingBottom: 18, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.line },
+  statsTitle: { color: colors.ink, fontSize: 14, fontWeight: '700', paddingHorizontal: 16, marginBottom: 14 },
   statsRow: { flexDirection: 'row' },
-  stat: { flex: 1, alignItems: 'center', gap: 4, borderRightWidth: StyleSheet.hairlineWidth, borderRightColor: 'rgba(255,255,255,0.25)' },
-  statValue: { color: colors.card, fontSize: 24, fontWeight: '800' },
-  statLabel: { color: 'rgba(255,255,255,0.62)', fontSize: 11 },
+  stat: { flex: 1, alignItems: 'center', gap: 4, borderRightWidth: StyleSheet.hairlineWidth, borderRightColor: colors.line },
+  statValue: { color: colors.ink, fontSize: 24, fontWeight: '800' },
+  statLabel: { color: colors.secondary, fontSize: 11 },
   menuGroup: { marginTop: 14, backgroundColor: colors.card, borderRadius: radius.large, overflow: 'hidden' },
   menuRow: { minHeight: 70, paddingHorizontal: 15, flexDirection: 'row', alignItems: 'center', gap: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
   menuIcon: { width: 40, height: 40, borderRadius: 13, backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center' },
