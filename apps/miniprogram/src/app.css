@@ -1,0 +1,31 @@
+page {
+  --atlas-ink: #171811;
+  --atlas-secondary: #6f7067;
+  --atlas-muted: #a3a599;
+  --atlas-paper: #f6f5ee;
+  --atlas-card: #ffffff;
+  --atlas-line: #e8e6db;
+  --atlas-accent: #e7603c;
+  --atlas-accent-soft: #fce9e2;
+  --atlas-sage: #779176;
+  --atlas-sage-soft: #e8efe6;
+  --atlas-blue: #607f94;
+  background: var(--atlas-paper);
+  color: var(--atlas-ink);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 16px;
+}
+
+button::after {
+  border: 0;
+}
+
+.atlas-page {
+  min-height: 100vh;
+  box-sizing: border-box;
+  background: var(--atlas-paper);
+}
+
+.atlas-safe-bottom {
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+}

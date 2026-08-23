@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 
 export const contentKindSchema = z.enum([
   'note',
@@ -49,6 +49,7 @@ export const contentItemSchema = z.object({
   lastSubmittedBy: z.string().max(40).default(''),
   teamName: z.string().max(40).default('无'),
   teamNames: z.array(z.string().trim().min(1).max(40)).max(20).default(['无']),
+  projectIds: z.array(z.string().uuid()).max(20).default([]),
   isPublic: z.boolean().default(false),
   attachments: z.array(attachmentSchema).max(20),
   tags: z.array(z.string().trim().min(1).max(24)).max(10),
@@ -75,6 +76,7 @@ export const contentDraftSchema = z
     location: z.string().trim().max(80).optional(),
     authorName: z.string().trim().max(40).optional(),
     teamNames: z.array(z.string().trim().min(1).max(40)).max(20).optional(),
+    projectIds: z.array(z.string().uuid()).max(20).optional(),
     isPublic: z.boolean().optional(),
   })
   .superRefine((draft, context) => {
@@ -94,6 +96,17 @@ export const contentDraftSchema = z
     }
     if (draft.attachments.filter((attachment) => attachment.kind === 'audio').length > 1) {
       context.addIssue({ code: 'custom', message: 'content.onlyOneAudio', path: ['attachments'] });
+    }
+    if (draft.attachments.filter((attachment) => attachment.kind === 'image').length > 9) {
+      context.addIssue({ code: 'custom', message: '最多只能添加 9 张图片', path: ['attachments'] });
+    }
+    const mediaKinds = new Set(
+      draft.attachments
+        .filter((attachment) => attachment.kind === 'image' || attachment.kind === 'video' || attachment.kind === 'audio')
+        .map((attachment) => attachment.kind),
+    );
+    if (mediaKinds.size > 1) {
+      context.addIssue({ code: 'custom', message: '图片、视频和音频不能混合发布', path: ['attachments'] });
     }
     if (draft.attachments.some((attachment) => attachment.kind === 'audio' || attachment.kind === 'video') && !draft.title.trim() && !draft.body.trim()) {
       context.addIssue({ code: 'custom', message: 'content.mediaTextRequired', path: ['body'] });
@@ -140,6 +153,7 @@ export function createContentItem(
     lastSubmittedBy: draft.authorName?.trim() || '我',
     teamName: '无',
     teamNames: normalizeTeams(draft.teamNames),
+    projectIds: [...new Set(draft.projectIds ?? [])],
     isPublic: draft.isPublic ?? false,
     attachments: draft.attachments,
     tags: [...new Set(draft.tags.map((tag) => tag.trim()).filter(Boolean))],

@@ -38,9 +38,9 @@ flowchart TB
 
 附件先复制到 App Documents，再写入 SQLite。发布被取消时单个移除的附件会立即清理；删除已发布内容也会清理全部附件。
 
-## 后端与同步设计（后续版本）
+## 后端与同步设计（已落地基础）
 
-后端计划放在 `apps/api`，采用 NestJS 11 + PostgreSQL + Prisma + Redis：
+后端位于 `apps/api`，采用 NestJS 11 + PostgreSQL + Prisma；Redis 缓存和限流仍属于生产部署阶段：
 
 ```text
 REST Controller → Application Service → Repository → PostgreSQL
@@ -48,15 +48,21 @@ REST Controller → Application Service → Repository → PostgreSQL
                                       ↘ Object Storage
 ```
 
-客户端仍调用核心应用服务，新增 `RemoteContentRepository` 和同步协调器。文件使用预签名 URL 直传对象存储；服务端只保存内容元数据、附件索引和版本号。同步协议需要加入 `revision`、`deletedAt` 与幂等请求键，解决离线修改和重复提交。
+客户端仍调用核心应用服务，并通过 Sync Coordinator 协调本地队列和 API Client。文件使用预签名 URL 直传对象存储；服务端保存内容元数据、附件索引、项目关系和版本号。同步协议已经包含 `revision`、`deletedAt` 与幂等请求键，用于处理离线修改、重复提交和显式冲突。
 
-安全基线包括 JWT + refresh token 轮换、NestJS Throttler 限流、Zod/DTO 双侧校验、MIME 与魔数校验、文件大小上限和恶意文件扫描。
+内容版本使用不可变快照：正文编辑必须创建更高的语义版本，同版本只允许同步点赞、收藏、阅读等非版本数据。项目内容的审核由所有关联项目的角色共同决定，驳回当前版本恢复最近的已通过快照，避免未审核内容继续向外部展示。
+
+个人合集由服务端 `collections` 与 `collection_items` 保存，`position` 是唯一排序依据。Core 统一约束合集只能包含同类型个人内容；小程序纵向 Swiper 只激活当前页媒体，并在页面切换时暂停视频或销毁音频上下文。
+
+评论是独立服务端实体，回复通过自关联保存，用户点赞使用 `comment_likes` 多对多关系而不是客户端布尔值。评论数与分享数更新内容 revision，使其他设备继续通过既有增量同步获得权威指标；分享落地读取仍复用内容可见性规则。
+
+安全基线包括 JWT + refresh token 轮换、单实例固定窗口限流、请求 ID、结构化访问日志、Zod 边界校验、MIME 与文件大小限制，以及微信文本内容安全检查。对象上传后的魔数复核、恶意文件扫描、媒体内容安全和多实例共享限流仍是生产部署阻塞项。
 
 ## 多平台里程碑
 
 1. `0.0.1` iOS：本地发布、媒体与文件、搜索筛选、收藏。
 2. Android：复用 `@atlas/core` 与大部分 React Native UI，补齐权限、文件 URI 和返回键适配。
-3. 微信小程序：Taro 适配层，Repository 改为小程序存储 + 云端同步，页面级拆包。
+3. 微信小程序：Taro 适配层，小程序存储 + 云端同步，当前优先开发至生产版本。
 4. PC Web：Next.js App Router + shadcn/ui，Dexie.js 实现 IndexedDB Repository；服务端渲染只覆盖公开内容页。
 
 ## 工程约束

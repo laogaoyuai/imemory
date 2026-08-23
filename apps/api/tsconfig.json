@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "verbatimModuleSyntax": false,
+    "ignoreDeprecations": "6.0",
+    "lib": ["ES2023"],
+    "types": ["node", "jest"],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "useDefineForClassFields": false,
+    "strictPropertyInitialization": false,
+    "rootDir": ".",
+    "outDir": "dist",
+    "sourceMap": true,
+    "noEmit": true
+  },
+  "include": ["src/**/*.ts", "prisma.config.ts"]
+}

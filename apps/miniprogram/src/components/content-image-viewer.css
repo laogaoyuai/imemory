@@ -1,0 +1,8 @@
+.atlas-image-viewer { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 1000; background: rgba(0, 0, 0, .96); }
+.atlas-image-viewer__swiper { width: 100%; height: 100%; }
+.atlas-image-viewer__slide { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; }
+.atlas-image-viewer__slide image { display: block; width: 100%; height: 100%; pointer-events: none; user-select: none; }
+.atlas-image-viewer__close { position: absolute; top: calc(env(safe-area-inset-top) + 18px); right: 18px; display: flex; width: 38px; height: 38px; align-items: center; justify-content: center; border-radius: 19px; background: rgba(255,255,255,.16); color: white; font-size: 28px; line-height: 34px; text-align: center; }
+.atlas-image-viewer__pagination { position: absolute; right: 18px; bottom: calc(env(safe-area-inset-bottom) + 28px); left: 18px; display: flex; align-items: center; justify-content: center; gap: 7px; }
+.atlas-image-viewer__dot { width: 7px; height: 7px; border-radius: 4px; background: rgba(255,255,255,.42); }
+.atlas-image-viewer__dot--active { width: 9px; height: 9px; border-radius: 5px; background: white; }

@@ -8,9 +8,17 @@
   },
   "scripts": {
     "dev:ios": "pnpm --filter @atlas/ios start",
+    "dev:mini": "pnpm --filter @atlas/miniprogram dev:weapp",
+    "dev:api": "pnpm --filter @atlas/api dev",
     "ios": "pnpm --filter @atlas/ios ios",
-    "typecheck": "tsc -p packages/core/tsconfig.json --noEmit && tsc -p apps/ios/tsconfig.json --noEmit",
-    "test": "jest --config packages/core/jest.config.cjs --runInBand",
+    "build:mini": "pnpm --filter @atlas/miniprogram build:weapp",
+    "build:api": "pnpm --filter @atlas/api build",
+    "check:release": "node scripts/check-release.mjs",
+    "check:release:strict": "node scripts/check-release.mjs --strict",
+    "db:generate": "pnpm --filter @atlas/api generate",
+    "db:migrate": "pnpm --filter @atlas/api exec prisma migrate dev",
+    "typecheck": "pnpm --filter @atlas/core typecheck && pnpm --filter @atlas/contracts typecheck && pnpm --filter @atlas/api-client typecheck && pnpm --filter @atlas/sync-engine typecheck && pnpm --filter @atlas/ios typecheck && pnpm --filter @atlas/miniprogram typecheck && pnpm --filter @atlas/api typecheck",
+    "test": "pnpm --filter @atlas/core test && pnpm --filter @atlas/sync-engine test && pnpm --filter @atlas/miniprogram test && pnpm --filter @atlas/api test",
     "lint": "pnpm -r --if-present lint"
   },
   "devDependencies": {

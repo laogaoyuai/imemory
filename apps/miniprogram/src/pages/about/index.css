@@ -1,0 +1,14 @@
+.about { padding: 22px 17px 36px; }
+.about__hero { padding: 8px 3px 22px; }
+.about__eyebrow { display: block; color: var(--atlas-accent); font-size: 10px; font-weight: 800; letter-spacing: 1.2px; }
+.about__title { display: block; margin-top: 8px; color: var(--atlas-ink); font-size: 24px; font-weight: 800; }
+.about__copy { display: block; margin-top: 8px; color: var(--atlas-secondary); font-size: 13px; line-height: 1.65; }
+.about__card { margin-bottom: 12px; padding: 17px; border-radius: 18px; background: white; }
+.about__section-title { display: block; margin-bottom: 10px; color: var(--atlas-ink); font-size: 15px; font-weight: 800; }
+.about__paragraph { display: block; margin-top: 8px; color: var(--atlas-secondary); font-size: 12px; line-height: 1.8; }
+.about__status { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--atlas-line); }
+.about__status text:first-child { color: var(--atlas-secondary); font-size: 12px; }
+.about__status text:last-child { max-width: 210px; color: var(--atlas-ink); font-size: 11px; text-align: right; }
+.about__primary { height: 42px; margin-top: 14px; border-radius: 13px; background: var(--atlas-ink); color: white; font-size: 13px; line-height: 42px; }
+.about__warning, .about__ready { display: block; margin-top: 10px; padding: 9px 10px; border-radius: 10px; background: #fff5e8; color: #99611e; font-size: 11px; }
+.about__ready { background: var(--atlas-sage-soft); color: var(--atlas-sage); }

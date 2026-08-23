@@ -2,6 +2,11 @@ packages:
   - apps/*
   - packages/*
 
+# pnpm 11 reads workspace install settings from this file. Keep the hoisted
+# layout required by Expo/Taro and preserve the repository's peer policy.
+nodeLinker: hoisted
+strictPeerDependencies: false
+
 overrides:
   '@react-native/metro-config': 0.85.3
   core-js-compat: 3.49.0
@@ -9,6 +14,32 @@ overrides:
   terser: 5.49.0
 
 allowBuilds:
+  '@parcel/watcher': true
+  '@prisma/engines': true
   '@swc/core': true
+  '@tarojs/binding': true
+  '@tarojs/cli': true
+  core-js: false
+  core-js-pure: false
   esbuild: true
+  prisma: true
   unrs-resolver: true
+
+minimumReleaseAgeExclude:
+  - '@aws-sdk/checksums@3.1000.29'
+  - '@aws-sdk/client-s3@3.1116.0'
+  - '@aws-sdk/core@3.977.9'
+  - '@aws-sdk/credential-provider-env@3.972.70'
+  - '@aws-sdk/credential-provider-http@3.972.72'
+  - '@aws-sdk/credential-provider-ini@3.973.15'
+  - '@aws-sdk/credential-provider-login@3.972.77'
+  - '@aws-sdk/credential-provider-node@3.972.81'
+  - '@aws-sdk/credential-provider-process@3.972.70'
+  - '@aws-sdk/credential-provider-sso@3.973.14'
+  - '@aws-sdk/credential-provider-web-identity@3.972.76'
+  - '@aws-sdk/middleware-sdk-s3@3.972.75'
+  - '@aws-sdk/nested-clients@3.997.44'
+  - '@aws-sdk/signature-v4-multi-region@3.996.46'
+  - '@aws-sdk/token-providers@3.1116.0'
+  - '@aws-sdk/types@3.974.5'
+  - '@aws-sdk/xml-builder@3.972.40'

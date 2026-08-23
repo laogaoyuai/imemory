@@ -1,9 +1,13 @@
 node_modules/
 .pnpm-store/
 .expo/
+.swc/
 dist/
 coverage/
 *.log
 .DS_Store
+**/.env
+**/.env.local
+**/project.private.config.json
 apps/ios/ios/
 apps/ios/android/

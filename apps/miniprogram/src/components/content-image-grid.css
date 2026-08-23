@@ -1,0 +1,9 @@
+.atlas-image-grid { display: grid; gap: 5px; overflow: hidden; }
+.atlas-image-grid--1 { display: block; }
+.atlas-image-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.atlas-image-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.atlas-image-grid__cell { position: relative; width: 100%; padding-top: 100%; overflow: hidden; background: var(--atlas-paper); }
+.atlas-image-grid__cell--empty { background: transparent; }
+.atlas-image-grid__cell .atlas-image-grid__image { position: absolute; top: 0; left: 0; display: block; width: 100%; height: 100%; }
+.atlas-image-grid--1 .atlas-image-grid__cell { background: transparent; }
+.atlas-image-grid--1 .atlas-image-grid__cell .atlas-image-grid__image { top: 0; left: 0; }

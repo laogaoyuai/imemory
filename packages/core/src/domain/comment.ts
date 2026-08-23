@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 
 export const contentCommentSchema = z.object({
   id: z.string().min(1),
@@ -14,3 +14,16 @@ export const contentCommentSchema = z.object({
 });
 
 export type ContentComment = z.infer<typeof contentCommentSchema>;
+
+export function selectCommentHighlights(comments: readonly ContentComment[], limit = 5): ContentComment[] {
+  if (limit <= 0) return [];
+  const liked = [...comments]
+    .filter((comment) => comment.likeCount > 0)
+    .sort((left, right) => right.likeCount - left.likeCount || left.createdAt.localeCompare(right.createdAt))
+    .slice(0, 3);
+  const selected = new Set(liked.map((comment) => comment.id));
+  const earliest = [...comments]
+    .filter((comment) => !selected.has(comment.id))
+    .sort((left, right) => left.createdAt.localeCompare(right.createdAt));
+  return [...liked, ...earliest].slice(0, limit);
+}

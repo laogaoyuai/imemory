@@ -1,0 +1,23 @@
+.versions { padding: 18px 16px 0; }
+.versions--loading { display: flex; min-height: 60vh; flex-direction: column; align-items: center; justify-content: center; gap: 14px; color: var(--atlas-muted); }
+.versions--loading button { margin: 0; color: var(--atlas-accent); font-size: 12px; }
+.versions__head { display: flex; align-items: flex-end; justify-content: space-between; padding: 8px 2px 18px; }
+.versions__eyebrow { display: block; color: var(--atlas-accent); font-size: 11px; font-weight: 700; }
+.versions__title { display: block; margin-top: 6px; color: var(--atlas-ink); font-size: 22px; font-weight: 800; }
+.versions__count { color: var(--atlas-muted); font-size: 11px; }
+.versions__error { margin-bottom: 12px; padding: 10px 12px; border-radius: 10px; background: #fff0ed; color: #b34835; font-size: 11px; }
+.versions__card { margin-bottom: 13px; padding: 15px; border: 1px solid var(--atlas-line); border-radius: 16px; background: white; }
+.versions__card--current { border-color: #adc4bb; box-shadow: 0 5px 16px rgba(68, 95, 85, 0.08); }
+.versions__row { display: flex; align-items: center; justify-content: space-between; }
+.versions__number { color: var(--atlas-ink); font-size: 14px; font-weight: 800; }
+.versions__status { padding: 4px 7px; border-radius: 8px; font-size: 9px; }
+.versions__status--approved { background: var(--atlas-sage-soft); color: var(--atlas-sage); }
+.versions__status--pending { background: #fff2ce; color: #956c13; }
+.versions__status--rejected { background: #fff0ed; color: #b34835; }
+.versions__snapshot-title { display: block; margin-top: 13px; color: var(--atlas-secondary); font-size: 13px; font-weight: 700; }
+.versions__summary { display: -webkit-box; margin-top: 7px; overflow: hidden; color: var(--atlas-muted); font-size: 11px; line-height: 1.6; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.versions__meta, .versions__reviewer { display: block; margin-top: 9px; color: var(--atlas-muted); font-size: 9px; }
+.versions__reviewer { margin-top: 3px; }
+.versions__actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 13px; }
+.versions__actions button { height: 32px; margin: 0; padding: 0 11px; border-radius: 10px; background: var(--atlas-paper); color: var(--atlas-secondary); font-size: 10px; line-height: 32px; }
+.versions__actions .versions__danger { background: #fff0ed; color: #b34835; }

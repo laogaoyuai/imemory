@@ -37,6 +37,7 @@ describe('ContentService', () => {
       tags: ['架构'],
     });
     expect(repository.items.get(item.id)).toEqual(item);
+    expect(item.projectIds).toEqual([]);
     expect(service.snapshot.items).toHaveLength(1);
 
     await service.toggleFavorite(item.id);

@@ -1,4 +1,4 @@
-import { createContentItem, inferContentKind, type ContentDraft } from './content';
+import { contentDraftSchema, createContentItem, inferContentKind, type ContentDraft } from './content';
 import { queryContent } from './query';
 
 const emptyDraft: ContentDraft = { title: '', body: '', attachments: [], tags: [] };
@@ -48,6 +48,37 @@ describe('content domain', () => {
     );
     expect(item.title).toBe('');
     expect(item.tags).toEqual(['灵感']);
+  });
+
+  it('rejects mixed image, video, and audio attachments', () => {
+    const attachment = { name: 'media', uri: 'file://media', mimeType: null, size: null, width: null, height: null, durationMs: null };
+    const result = contentDraftSchema.safeParse({
+      ...emptyDraft,
+      body: '带媒体的内容',
+      attachments: [
+        { ...attachment, id: 'image-1', kind: 'image' },
+        { ...attachment, id: 'video-1', kind: 'video' },
+      ],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects more than nine images', () => {
+    const result = contentDraftSchema.safeParse({
+      ...emptyDraft,
+      attachments: Array.from({ length: 10 }, (_, index) => ({
+        id: `image-${index}`,
+        kind: 'image',
+        name: `${index}.jpg`,
+        uri: `file://${index}.jpg`,
+        mimeType: 'image/jpeg',
+        size: null,
+        width: 100,
+        height: 100,
+        durationMs: null,
+      })),
+    });
+    expect(result.success).toBe(false);
   });
 
   it('queries by filter and keyword', () => {

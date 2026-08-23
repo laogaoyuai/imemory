@@ -1,0 +1,50 @@
+.collection-viewer { height: 100vh; overflow: hidden; background: #20211d; color: white; }
+.collection-viewer--loading { display: flex; align-items: center; justify-content: center; color: #bfc2b8; }
+.collection-viewer__bar { display: flex; height: 54px; box-sizing: border-box; align-items: center; justify-content: space-between; padding: 7px 14px; background: #f6f5ee; color: var(--atlas-ink); }
+.collection-viewer__bar > view text:first-child { display: block; max-width: 250px; overflow: hidden; font-size: 14px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.collection-viewer__bar > view text:last-child { display: block; margin-top: 2px; color: var(--atlas-muted); font-size: 9px; }
+.collection-viewer__bar button { height: 32px; margin: 0; padding: 0 11px; border-radius: 10px; background: var(--atlas-accent); color: white; font-size: 10px; line-height: 32px; }
+.collection-viewer__swiper { height: calc(100vh - 54px); }
+.collection-viewer__empty { display: flex; height: calc(100vh - 54px); flex-direction: column; align-items: center; justify-content: center; gap: 14px; color: #bfc2b8; font-size: 13px; }
+.collection-viewer__empty button { height: 38px; margin: 0; padding: 0 15px; border-radius: 12px; background: var(--atlas-accent); color: white; font-size: 11px; line-height: 38px; }
+.collection-slide { position: relative; height: 100%; box-sizing: border-box; padding: 0 64px 0 16px; background: linear-gradient(155deg, #262822, #191a17); }
+.collection-slide__scroll { height: calc(100% - 38px); }
+.collection-slide__sequence { display: block; padding-top: 20px; color: #a9c0ae; font-size: 10px; font-weight: 700; }
+.collection-slide__title { display: block; margin-top: 15px; font-size: 23px; font-weight: 800; line-height: 1.4; }
+.collection-slide__body { display: block; margin-top: 13px; color: #e8e9e3; font-size: 15px; line-height: 1.85; white-space: pre-wrap; }
+.collection-slide__body--article { max-height: 300px; overflow: hidden; }
+.collection-slide__video { display: block; width: 100%; height: 390px; margin-top: 15px; border-radius: 13px; background: black; }
+.collection-slide__audio-player { margin-top: 18px; background: rgba(255,255,255,.1); }
+.collection-slide__audio-player .atlas-audio-player__name { color: white; }
+.collection-slide__audio-player .atlas-audio-player__time { color: #adb0a7; }
+.collection-slide__audio-player .atlas-audio-player__wave { background: #a9c0ae; }
+.collection-slide__images { margin-top: 17px; border-radius: 13px; background: #111; }
+.collection-slide__images .atlas-image-grid__image { background: #111; }
+.collection-slide__date { display: block; padding: 15px 0 25px; color: #8e9188; font-size: 9px; }
+.collection-slide__rail { position: absolute; right: 8px; bottom: 63px; display: flex; width: 50px; flex-direction: column; align-items: center; gap: 13px; color: #e6e7e1; font-size: 9px; }
+.collection-slide__avatar { display: flex; width: 39px; height: 39px; align-items: center; justify-content: center; border: 2px solid white; border-radius: 50%; background: var(--atlas-accent); font-weight: 800; }
+.collection-slide__rail button { width: 44px; height: 28px; margin: 0; padding: 0; border-radius: 9px; background: rgba(255,255,255,.12); color: white; font-size: 9px; line-height: 28px; }
+.collection-slide__next { position: absolute; right: 0; bottom: 12px; left: 0; color: #787b73; font-size: 9px; text-align: center; }
+.collection-viewer__comment-preview { position: fixed; right: 70px; bottom: 42px; left: 14px; z-index: 5; display: flex; align-items: center; gap: 7px; padding: 9px 11px; border-radius: 12px; background: rgba(0,0,0,.48); color: white; }
+.collection-viewer__comment-preview text:first-child { flex: none; color: #a9c0ae; font-size: 9px; font-weight: 700; }
+.collection-viewer__comment-preview text:nth-child(2) { min-width: 0; overflow: hidden; flex: 1; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.collection-viewer__comment-preview text:last-child { flex: none; color: #b7bab2; font-size: 8px; }
+.collection-viewer__comments { position: fixed; right: 0; bottom: 0; left: 0; z-index: 10; display: flex; height: 68vh; flex-direction: column; overflow: hidden; border-radius: 22px 22px 0 0; background: var(--atlas-paper); color: var(--atlas-ink); }
+.collection-viewer__comments-head { display: flex; align-items: center; justify-content: space-between; padding: 15px 17px 10px; font-size: 14px; font-weight: 800; }
+.collection-viewer__comments-head text:last-child { color: var(--atlas-muted); font-size: 11px; }
+.collection-viewer__comments-list { min-height: 0; flex: 1; padding: 0 14px; box-sizing: border-box; }
+.collection-viewer__comment { display: flex; align-items: flex-end; gap: 10px; margin: 8px 0; padding: 10px 11px; border-radius: 13px; background: white; }
+.collection-viewer__comment > view:first-child { min-width: 0; flex: 1; }
+.collection-viewer__comment > view:first-child text { display: block; }
+.collection-viewer__comment > view:first-child text:first-child { color: var(--atlas-secondary); font-size: 9px; font-weight: 700; }
+.collection-viewer__comment > view:first-child text:nth-child(2) { margin-top: 4px; padding: 5px; border-radius: 6px; background: var(--atlas-paper); color: var(--atlas-muted); font-size: 9px; }
+.collection-viewer__comment > view:first-child text:last-child { margin-top: 4px; font-size: 12px; line-height: 1.5; }
+.collection-viewer__comment > view:last-child { display: flex; flex: none; gap: 9px; color: var(--atlas-muted); font-size: 9px; }
+.collection-viewer__comment > view:last-child .collection-viewer__liked { color: var(--atlas-accent); }
+.collection-viewer__no-comments { display: block; padding-top: 60px; color: var(--atlas-muted); font-size: 11px; text-align: center; }
+.collection-viewer__composer { padding: 8px 12px calc(8px + env(safe-area-inset-bottom)); background: white; }
+.collection-viewer__composer > view:first-child { display: flex; justify-content: space-between; padding-bottom: 6px; color: var(--atlas-secondary); font-size: 9px; }
+.collection-viewer__composer > view:first-child text:last-child { color: var(--atlas-accent); }
+.collection-viewer__composer > view:last-child { display: flex; align-items: flex-end; gap: 8px; }
+.collection-viewer__composer textarea { min-height: 38px; max-height: 74px; flex: 1; box-sizing: border-box; padding: 8px; border-radius: 10px; background: var(--atlas-paper); font-size: 11px; }
+.collection-viewer__composer button { width: 55px; height: 36px; margin: 0; padding: 0; border-radius: 10px; background: var(--atlas-accent); color: white; font-size: 10px; line-height: 36px; }

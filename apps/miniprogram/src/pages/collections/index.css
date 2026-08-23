@@ -1,0 +1,31 @@
+.collections { padding: 18px 16px 0; }
+.collections--login { display: flex; min-height: 75vh; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: var(--atlas-muted); font-size: 12px; }
+.collections--login button { height: 40px; margin: 10px 0 0; padding: 0 18px; border-radius: 13px; background: var(--atlas-accent); color: white; font-size: 13px; line-height: 40px; }
+.collections__head { display: flex; align-items: flex-end; justify-content: space-between; padding: 8px 2px 0; }
+.collections__head button { height: 38px; margin: 0; padding: 0 13px; border-radius: 12px; background: var(--atlas-accent); color: white; font-size: 12px; line-height: 38px; }
+.collections__eyebrow { display: block; color: var(--atlas-accent); font-size: 9px; font-weight: 700; letter-spacing: 1.2px; }
+.collections__title { display: block; margin-top: 6px; color: var(--atlas-ink); font-size: 23px; font-weight: 800; }
+.collections__intro { display: block; margin: 7px 2px 18px; color: var(--atlas-secondary); font-size: 12px; }
+.collections__create { display: flex; flex-direction: column; gap: 11px; margin-bottom: 17px; padding: 15px; border-radius: 17px; background: white; }
+.collections__create input, .collections__create textarea { width: 100%; box-sizing: border-box; padding: 11px 12px; border-radius: 11px; background: var(--atlas-paper); font-size: 13px; }
+.collections__create textarea { height: 72px; }
+.collections__cover { display: flex; height: 96px; align-items: center; justify-content: center; overflow: hidden; border-radius: 13px; background: var(--atlas-accent-soft); color: var(--atlas-accent); font-size: 11px; }
+.collections__cover image { width: 100%; height: 100%; }
+.collections__label { color: var(--atlas-secondary); font-size: 11px; font-weight: 700; }
+.collections__types { display: flex; flex-wrap: wrap; gap: 7px; }
+.collections__types text { padding: 7px 11px; border-radius: 999px; background: var(--atlas-paper); color: var(--atlas-secondary); font-size: 11px; }
+.collections__types .collections__type--active { background: var(--atlas-sage); color: white; }
+.collections__save { height: 42px; border-radius: 13px; background: var(--atlas-accent); color: white; font-size: 13px; line-height: 42px; }
+.collections__card { display: flex; align-items: center; gap: 12px; margin-bottom: 11px; padding: 12px; border-radius: 16px; background: white; }
+.collections__card > image, .collections__cover-fallback { display: flex; width: 66px; height: 66px; flex: none; align-items: center; justify-content: center; border-radius: 15px; background: var(--atlas-accent-soft); color: var(--atlas-accent); font-size: 24px; font-weight: 800; }
+.collections__copy { min-width: 0; flex: 1; }
+.collections__copy > view { display: flex; align-items: center; gap: 8px; }
+.collections__name { overflow: hidden; color: var(--atlas-ink); font-size: 15px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.collections__type-label { color: var(--atlas-sage); font-size: 10px; }
+.collections__description { display: block; margin-top: 5px; overflow: hidden; color: var(--atlas-secondary); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.collections__meta { display: block; margin-top: 6px; color: var(--atlas-muted); font-size: 10px; }
+.collections__arrow { color: var(--atlas-muted); font-size: 24px; }
+.collections__error { margin-bottom: 12px; padding: 10px; border-radius: 10px; background: #fff0ed; color: #b34835; font-size: 11px; }
+.collections__empty { display: flex; min-height: 270px; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--atlas-muted); font-size: 12px; }
+.collections__empty-symbol { color: var(--atlas-sage); font-size: 38px; }
+.collections__empty-title { color: var(--atlas-ink); font-size: 16px; font-weight: 800; }

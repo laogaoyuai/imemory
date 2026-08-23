@@ -83,8 +83,8 @@ export class ContentService {
     const current = this.snapshot.items.find((item) => item.id === id) ?? await this.repository.get(id);
     if (!current) throw new Error('内容不存在');
     const parsed = createContentItem({ ...draft, authorName: draft.authorName ?? current.authorName }, this.dependencies);
-    const changed = JSON.stringify({ title: parsed.title, body: parsed.body, excerpt: parsed.excerpt, location: parsed.location, teamNames: parsed.teamNames, isPublic: parsed.isPublic, attachments: parsed.attachments, tags: parsed.tags }) !==
-      JSON.stringify({ title: current.title, body: current.body, excerpt: current.excerpt, location: current.location, teamNames: current.teamNames, isPublic: current.isPublic, attachments: current.attachments, tags: current.tags });
+    const changed = JSON.stringify({ title: parsed.title, body: parsed.body, excerpt: parsed.excerpt, location: parsed.location, teamNames: parsed.teamNames, projectIds: parsed.projectIds, isPublic: parsed.isPublic, attachments: parsed.attachments, tags: parsed.tags }) !==
+      JSON.stringify({ title: current.title, body: current.body, excerpt: current.excerpt, location: current.location, teamNames: current.teamNames, projectIds: current.projectIds, isPublic: current.isPublic, attachments: current.attachments, tags: current.tags });
     if (!changed && !customVersion?.trim()) return current;
     const version = customVersion?.trim() || incrementPatch(current.version);
     if (!isGreaterVersion(version, current.version)) throw new Error('版本号只能变大');
