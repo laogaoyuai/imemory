@@ -7,6 +7,7 @@
 .detail__title { display: block; margin-top: 28px; color: var(--atlas-ink); font-size: 25px; font-weight: 800; line-height: 1.4; }
 .detail__body { display: block; margin-top: 18px; color: var(--atlas-ink); font-size: 16px; line-height: 1.9; white-space: pre-wrap; }
 .detail__images { margin-top: 16px; border-radius: 14px; background: white; }
+.detail__images.atlas-image-grid--1 { background: transparent; }
 .detail__video { height: 300px; margin-top: 16px; }
 .detail__audio { margin-top: 16px; }
 .detail__attachment { display: flex; align-items: center; gap: 12px; margin-top: 15px; padding: 14px; border-radius: 14px; background: white; }
@@ -31,11 +32,12 @@
 .detail__comments-head text:first-child { color: var(--atlas-ink); font-size: 18px; font-weight: 800; }
 .detail__comments-head text:last-child { color: var(--atlas-muted); font-size: 11px; }
 .detail__comment { display: flex; align-items: flex-start; gap: 8px; margin-top: 10px; }
-.detail__comment--mine { flex-direction: row-reverse; }
+.detail__comment--mine { justify-content: flex-end; }
 .detail__comment-avatar { display: flex; width: 31px; height: 31px; flex: none; align-items: center; justify-content: center; border-radius: 50%; background: var(--atlas-accent-soft); color: var(--atlas-accent); font-size: 11px; font-weight: 700; }
 .detail__comment-bubble { min-width: 0; flex: 1; padding: 10px 11px; border: 1px solid var(--atlas-line); border-radius: 14px; background: white; }
 .detail__comment--mine .detail__comment-bubble { background: var(--atlas-accent-soft); }
 .detail__comment-author { display: block; color: var(--atlas-secondary); font-size: 10px; font-weight: 700; }
+.detail__comment-author--mine { text-align: right; }
 .detail__comment-quote { display: block; margin-top: 5px; padding: 6px 7px; border-radius: 7px; background: rgba(0,0,0,.05); color: var(--atlas-secondary); font-size: 10px; }
 .detail__comment-body { display: block; margin-top: 5px; color: var(--atlas-ink); font-size: 13px; line-height: 1.6; white-space: pre-wrap; }
 .detail__comment-foot { display: flex; gap: 11px; margin-top: 7px; color: var(--atlas-muted); font-size: 9px; }
@@ -49,3 +51,4 @@
 .detail__composer-row { display: flex; align-items: flex-end; gap: 8px; }
 .detail__composer-row textarea { min-height: 38px; max-height: 90px; flex: 1; box-sizing: border-box; padding: 8px 9px; border-radius: 10px; background: var(--atlas-paper); font-size: 12px; }
 .detail__composer-row button { width: 58px; height: 36px; margin: 0; padding: 0; border-radius: 10px; background: var(--atlas-accent); color: white; font-size: 11px; line-height: 36px; }
+.detail__login-comment { width: 100%; height: 40px; margin: 4px 0 0; padding: 0 12px; border-radius: 12px; background: white; color: var(--atlas-accent); font-size: 12px; line-height: 40px; }

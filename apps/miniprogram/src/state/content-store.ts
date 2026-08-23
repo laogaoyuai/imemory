@@ -33,6 +33,8 @@ interface ContentStore {
   visibleItems: ContentItem[];
   filter: ContentFilter;
   keyword: string;
+  tags: string[];
+  locations: string[];
   loading: boolean;
   hydrated: boolean;
   accountId: string | null;
@@ -48,6 +50,8 @@ interface ContentStore {
   resolveConflict: (contentId: string, strategy: 'local' | 'remote') => Promise<void>;
   setFilter: (filter: ContentFilter) => void;
   setKeyword: (keyword: string) => void;
+  toggleTag: (tag: string) => void;
+  toggleLocation: (location: string) => void;
   publish: (draft: ContentDraft) => Promise<ContentItem>;
   update: (id: string, draft: ContentDraft, version?: string) => Promise<ContentItem>;
   listVersions: (contentId: string) => Promise<ContentVersionListResponse>;
@@ -72,6 +76,8 @@ function snapshot() {
     visibleItems: queryContent(state.items, state),
     filter: state.filter,
     keyword: state.keyword,
+    tags: state.tags,
+    locations: state.locations,
     loading: state.loading,
   };
 }
@@ -152,6 +158,20 @@ export const useContentStore = create<ContentStore>((set, get) => ({
     service.setQuery({ keyword });
     set(snapshot());
   },
+  toggleTag: (tag) => {
+    const tags = get().tags.includes(tag)
+      ? get().tags.filter((item) => item !== tag)
+      : [...get().tags, tag];
+    service.setQuery({ tags });
+    set(snapshot());
+  },
+  toggleLocation: (location) => {
+    const locations = get().locations.includes(location)
+      ? get().locations.filter((item) => item !== location)
+      : [...get().locations, location];
+    service.setQuery({ locations });
+    set(snapshot());
+  },
   publish: async (draft) => {
     try {
       const item = await service.publish(draft);
@@ -219,7 +239,14 @@ export const useContentStore = create<ContentStore>((set, get) => ({
     }
     return response.content.item;
   },
-  listComments: async (contentId) => (await remoteApi.listComments(contentId)).comments,
+  listComments: async (contentId) => {
+    try {
+      return (await remoteApi.listComments(contentId)).comments;
+    } catch {
+      // Local drafts and offline content can still show comments saved on this device.
+      return repository.listComments(contentId);
+    }
+  },
   addComment: async (contentId, body, replyToId = null) => {
     const response = await remoteApi.createComment(contentId, { body, replyToId });
     if (get().getById(contentId)) {

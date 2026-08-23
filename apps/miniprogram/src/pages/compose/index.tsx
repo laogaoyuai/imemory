@@ -13,6 +13,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useContentStore } from '../../state/content-store';
 import { ensureWechatPrivacyAuthorization } from '../../privacy/privacy-consent';
 import { ContentAudioPlayer } from '../../components/content-audio-player';
+import { ContentImageViewer } from '../../components/content-image-viewer';
+import { ContentVideoPlayer } from '../../components/content-video-player';
 import { useProjectStore } from '../../state/project-store';
 import { useSessionStore } from '../../state/session-store';
 import './index.css';
@@ -44,6 +46,7 @@ export default function ComposePage() {
   const [submitting, setSubmitting] = useState(false);
   const [recording, setRecording] = useState(false);
   const [recordingMs, setRecordingMs] = useState(0);
+  const [imageViewerIndex, setImageViewerIndex] = useState<number | null>(null);
   const initializedSource = useRef('');
   const recorderRef = useRef<ReturnType<typeof Taro.getRecorderManager> | null>(null);
   const recordingRef = useRef(false);
@@ -179,7 +182,16 @@ export default function ComposePage() {
       const result = await nativeChooseMedia({ count: 1, mediaType: ['video'] });
       const file = result.tempFiles[0];
       if (!file) return;
-      const selected = await makeAttachment('video', nativeFilePath(file), file.size, file.width, file.height, file.duration ? file.duration * 1000 : null);
+      const selected = await makeAttachment(
+        'video',
+        nativeFilePath(file),
+        file.size,
+        file.width,
+        file.height,
+        file.duration ? file.duration * 1000 : null,
+        file.name,
+        file.thumbTempFilePath,
+      );
       setAttachments((current) => [...current.filter((attachment) => attachment.kind !== 'video'), selected].slice(0, 20));
     } catch (error) {
       await showMediaError(error, '视频选择失败');
@@ -316,17 +328,23 @@ export default function ComposePage() {
           <Button className={recording ? 'compose__recording-button' : ''} disabled={hasImages || hasVideo} onClick={() => void chooseAudio()}>{recording ? '停止录音' : hasAudio ? '重新录音' : '录音'}</Button>
           <Button onClick={() => void chooseFile()}>文件</Button>
         </View>
-        {attachments.length > 0 ? (
-          <View className="compose__attachments">
-            {attachments.map((attachment) => (
-              <View className="compose__attachment" key={attachment.id}>
-                {attachment.kind === 'image' ? <Image mode="aspectFill" src={attachment.uri} /> : attachment.kind === 'audio' ? <ContentAudioPlayer attachment={attachment} className="compose__audio-player" onCoverPress={() => void chooseAudioCover(attachment.id)} /> : <View className="compose__file-symbol">{attachment.kind === 'video' ? '▶' : '文'}</View>}
-                {attachment.kind !== 'audio' ? <Text>{attachment.name}</Text> : null}
-                <Text className="compose__remove" onClick={() => setAttachments((current) => current.filter((item) => item.id !== attachment.id))}>移除</Text>
-              </View>
-            ))}
-          </View>
-        ) : null}
+        {attachments.length > 0 ? <ComposeAttachments
+          attachments={attachments}
+          onAddImages={() => void chooseImages()}
+          imageViewerIndex={imageViewerIndex}
+          onAudioCover={(attachmentId) => void chooseAudioCover(attachmentId)}
+          onCloseImageViewer={() => setImageViewerIndex(null)}
+          onOpenImageViewer={setImageViewerIndex}
+          onRemove={(attachmentId) => {
+            setAttachments((current) => current.filter((item) => item.id !== attachmentId));
+            setImageViewerIndex((current) => {
+              if (current === null) return current;
+              const imageCountBeforeRemove = attachments.filter((item) => item.kind === 'image').length;
+              if (imageCountBeforeRemove <= 1) return null;
+              return Math.min(current, imageCountBeforeRemove - 2);
+            });
+          }}
+        /> : null}
         {recording ? <Text className="compose__recording-hint">正在录音 {formatRecordingTime(recordingMs)}，再次点击“停止录音”</Text> : null}
         <Text className="compose__hint">内容类型将自动识别；图片最多 9 张，图片、视频和音频不可混合添加。</Text>
       </View>
@@ -359,6 +377,84 @@ export default function ComposePage() {
   );
 }
 
+function ComposeAttachments({
+  attachments,
+  onAddImages,
+  imageViewerIndex,
+  onAudioCover,
+  onCloseImageViewer,
+  onOpenImageViewer,
+  onRemove,
+}: {
+  attachments: readonly Attachment[];
+  onAddImages: () => void;
+  imageViewerIndex: number | null;
+  onAudioCover: (attachmentId: string) => void;
+  onCloseImageViewer: () => void;
+  onOpenImageViewer: (index: number) => void;
+  onRemove: (attachmentId: string) => void;
+}) {
+  const images = attachments.filter((attachment) => attachment.kind === 'image').slice(0, 9);
+  const otherAttachments = attachments.filter((attachment) => attachment.kind !== 'image');
+  const hasAddCell = images.length < 9;
+  const imageCellCount = images.length > 0 ? Math.ceil((images.length + (hasAddCell ? 1 : 0)) / 3) * 3 : 0;
+
+  return (
+    <View className="compose__attachments">
+      {images.length > 0 ? (
+        <View className="compose__image-grid">
+          {Array.from({ length: imageCellCount }, (_, index) => {
+            const image = images[index];
+            const isAddCell = !image && hasAddCell && index === images.length;
+            return (
+              <View className="compose__image-grid-cell" key={image?.id ?? (isAddCell ? 'add-image' : `empty-image-${index}`)}>
+                {image ? (
+                  <View className="compose__image-grid-item">
+                    <Image
+                      className="compose__image-grid-image"
+                      mode="aspectFill"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onOpenImageViewer(index);
+                      }}
+                      src={image.uri}
+                    />
+                    <Text className="compose__image-remove" onClick={(event) => { event.stopPropagation(); onRemove(image.id); }}>×</Text>
+                  </View>
+                ) : isAddCell ? (
+                  <View className="compose__image-add" onClick={onAddImages}>
+                    <Text>＋</Text>
+                  </View>
+                ) : null}
+              </View>
+            );
+          })}
+        </View>
+      ) : null}
+      {otherAttachments.map((attachment) => (
+        attachment.kind === 'audio' ? (
+          <View className="compose__audio-attachment" key={attachment.id}>
+            <ContentAudioPlayer attachment={attachment} className="compose__audio-player" onCoverPress={() => onAudioCover(attachment.id)} />
+            <Text className="compose__media-remove compose__media-remove--audio" onClick={() => onRemove(attachment.id)}>×</Text>
+          </View>
+        ) : attachment.kind === 'video' ? (
+          <View className="compose__video-attachment" key={attachment.id}>
+            <ContentVideoPlayer attachment={attachment} className="compose__video-player" />
+            <View className="compose__video-caption"><Text>{attachment.name || '视频'}</Text><Text className="compose__media-remove" onClick={() => onRemove(attachment.id)}>移除</Text></View>
+          </View>
+        ) : (
+          <View className="compose__document-attachment" key={attachment.id}>
+            <View className="compose__file-symbol">文</View>
+            <Text className="compose__document-name">{attachment.name}</Text>
+            <Text className="compose__media-remove" onClick={() => onRemove(attachment.id)}>移除</Text>
+          </View>
+        )
+      ))}
+      {imageViewerIndex !== null && imageViewerIndex >= 0 ? <ContentImageViewer images={images} initialIndex={imageViewerIndex} onClose={onCloseImageViewer} /> : null}
+    </View>
+  );
+}
+
 async function makeAttachment(
   kind: AttachmentKind,
   path: string,
@@ -367,6 +463,7 @@ async function makeAttachment(
   height: number | null | undefined,
   durationMs: number | null | undefined = null,
   originalName?: string,
+  coverPath?: string,
 ): Promise<Attachment> {
   let uri = path;
   try {
@@ -388,8 +485,18 @@ async function makeAttachment(
     width: positiveNumberOrNull(width),
     height: positiveNumberOrNull(height),
     durationMs: finiteNumberOrNull(durationMs),
-    coverUri: null,
+    coverUri: coverPath ? await persistNativeFile(coverPath) : null,
   };
+}
+
+async function persistNativeFile(path: string): Promise<string> {
+  try {
+    const saved = await nativeSaveFile(path);
+    if (typeof saved.savedFilePath === 'string') return saved.savedFilePath;
+  } catch {
+    // Keep the temporary path when the development tool cannot persist it.
+  }
+  return path;
 }
 
 function finiteNumberOrNull(value: number | null | undefined): number | null {
@@ -428,6 +535,7 @@ interface NativeMediaFile {
   width?: number | null;
   height?: number | null;
   duration?: number;
+  thumbTempFilePath?: string;
 }
 
 interface NativeWechatMediaApi {

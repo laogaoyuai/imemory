@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev:weapp": "taro build --type weapp --watch",
-    "build:weapp": "taro build --type weapp",
+    "dev:weapp": "taro build --type weapp --watch --no-check",
+    "build:weapp": "taro build --type weapp --no-check",
     "typecheck": "tsc --noEmit",
     "test": "jest --config jest.config.cjs --runInBand"
   },

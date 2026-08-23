@@ -12,7 +12,23 @@
 .compose__media-actions .compose__recording-button { background: var(--atlas-accent); color: white; }
 .compose__hint { display: block; margin-top: 11px; color: var(--atlas-muted); font-size: 11px; line-height: 1.6; }
 .compose__recording-hint { display: block; margin-top: 10px; color: var(--atlas-accent); font-size: 11px; font-weight: 700; }
-.compose__attachments { margin-top: 12px; }
+.compose__attachments { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+.compose__image-grid { display: flex; flex-wrap: wrap; gap: 4px; }
+.compose__image-grid-cell { width: calc((100% - 8px) / 3); aspect-ratio: 1; overflow: hidden; border-radius: 7px; background: var(--atlas-line); }
+.compose__image-grid-item { position: relative; width: 100%; height: 100%; }
+.compose__image-grid-image { display: block; width: 100%; height: 100%; }
+.compose__image-add { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; background: var(--atlas-accent-soft); color: var(--atlas-accent); font-size: 28px; }
+.compose__image-remove { position: absolute; top: 5px; right: 5px; display: flex; width: 22px; height: 22px; align-items: center; justify-content: center; border-radius: 11px; background: rgba(0,0,0,.48); color: white; font-size: 18px; line-height: 20px; }
+.compose__video-attachment { overflow: hidden; border-radius: 14px; background: #111; }
+.compose__video-player { width: 100%; height: 220px; }
+.compose__video-caption { display: flex; align-items: center; gap: 8px; padding: 9px 11px; background: white; color: var(--atlas-secondary); font-size: 11px; }
+.compose__video-caption text:first-child { overflow: hidden; flex: 1; text-overflow: ellipsis; white-space: nowrap; }
+.compose__audio-attachment { position: relative; }
+.compose__audio-player { width: 100%; box-sizing: border-box; }
+.compose__document-attachment { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid var(--atlas-line); border-radius: 14px; background: white; }
+.compose__document-name { overflow: hidden; flex: 1; color: var(--atlas-secondary); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.compose__media-remove { flex: 0 0 auto; color: var(--atlas-accent); font-size: 11px; }
+.compose__media-remove--audio { position: absolute; top: 7px; right: 7px; z-index: 1; display: flex; width: 22px; height: 22px; align-items: center; justify-content: center; border-radius: 11px; background: rgba(0,0,0,.45); color: white; font-size: 18px; line-height: 20px; }
 .compose__attachment { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--atlas-line); color: var(--atlas-secondary); font-size: 12px; }
 .compose__attachment image, .compose__file-symbol { display: flex; width: 38px; height: 38px; align-items: center; justify-content: center; border-radius: 9px; background: var(--atlas-paper); }
 .compose__attachment .compose__audio-player { width: 100%; box-sizing: border-box; }

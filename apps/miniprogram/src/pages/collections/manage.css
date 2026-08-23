@@ -3,8 +3,9 @@
 .manage__cover { display: flex; height: 135px; align-items: center; justify-content: center; overflow: hidden; border-radius: 18px; background: var(--atlas-accent-soft); color: var(--atlas-accent); font-size: 12px; }
 .manage__cover image { width: 100%; height: 100%; }
 .manage__fields { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; padding: 14px; border-radius: 16px; background: white; }
-.manage__fields input, .manage__fields textarea { width: 100%; box-sizing: border-box; padding: 10px 11px; border-radius: 10px; background: var(--atlas-paper); font-size: 13px; }
-.manage__fields textarea { height: 70px; }
+.manage__fields input, .manage__fields textarea { display: block; width: 100%; box-sizing: border-box; padding: 9px 11px; border-radius: 10px; background: var(--atlas-paper); font-size: 13px; line-height: 21px; }
+.manage__fields input { height: 42px; padding: 0 11px; line-height: 42px; }
+.manage__fields textarea { height: 76px; }
 .manage__label { display: block; margin: 17px 2px 8px; color: var(--atlas-secondary); font-size: 11px; font-weight: 700; }
 .manage__types { display: flex; flex-wrap: wrap; gap: 7px; }
 .manage__types text { padding: 7px 11px; border-radius: 999px; background: white; color: var(--atlas-secondary); font-size: 11px; }

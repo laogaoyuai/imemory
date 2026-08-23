@@ -1,0 +1,19 @@
+.collection-create { padding: 20px 16px calc(36px + env(safe-area-inset-bottom)); }
+.collection-create--loading { display: flex; min-height: 70vh; align-items: center; justify-content: center; flex-direction: column; color: var(--atlas-muted); font-size: 13px; }
+.collection-create__login { height: 40px; margin-top: 16px; padding: 0 18px; border-radius: 13px; background: var(--atlas-accent); color: white; font-size: 13px; line-height: 40px; }
+.collection-create__intro { padding: 4px 4px 18px; }
+.collection-create__eyebrow { display: block; color: var(--atlas-accent); font-size: 10px; font-weight: 800; letter-spacing: 1.2px; }
+.collection-create__title { display: block; margin-top: 7px; color: var(--atlas-ink); font-size: 25px; font-weight: 800; }
+.collection-create__hint { display: block; margin-top: 8px; color: var(--atlas-muted); font-size: 11px; line-height: 1.6; }
+.collection-create__form { padding: 18px 16px; border-radius: 20px; background: white; }
+.collection-create__cover { display: flex; height: 122px; align-items: center; justify-content: center; overflow: hidden; border-radius: 16px; background: var(--atlas-accent-soft); color: var(--atlas-accent); font-size: 12px; }
+.collection-create__cover image { width: 100%; height: 100%; }
+.collection-create__label { display: block; margin: 16px 0 7px; color: var(--atlas-secondary); font-size: 12px; font-weight: 700; line-height: 18px; }
+.collection-create__label--first { margin-top: 16px; }
+.collection-create__form input, .collection-create__form textarea { display: block; width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 13px; background: var(--atlas-paper); color: var(--atlas-ink); font-size: 14px; line-height: 22px; }
+.collection-create__form input { height: 44px; padding: 0 12px; line-height: 44px; }
+.collection-create__form textarea { height: 90px; }
+.collection-create__types { display: flex; flex-wrap: wrap; gap: 8px; }
+.collection-create__types text { padding: 8px 12px; border-radius: 999px; background: var(--atlas-paper); color: var(--atlas-secondary); font-size: 12px; }
+.collection-create__types .collection-create__type--active { background: var(--atlas-sage); color: white; }
+.collection-create__submit { height: 43px; margin-top: 20px; border-radius: 13px; background: var(--atlas-accent); color: white; font-size: 14px; line-height: 43px; }

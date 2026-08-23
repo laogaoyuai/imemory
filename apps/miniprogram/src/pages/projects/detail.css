@@ -1,14 +1,16 @@
 .project-detail { padding: 18px 16px 40px; }
 .project-detail--loading { display: flex; min-height: 60vh; align-items: center; justify-content: center; color: var(--atlas-muted); }
-.project-detail__head { display: flex; align-items: center; gap: 11px; padding: 8px 2px 12px; }
-.project-detail__avatar { display: flex; width: 48px; height: 48px; align-items: center; justify-content: center; border-radius: 15px; background: var(--atlas-sage-soft); color: var(--atlas-sage); font-size: 20px; font-weight: 800; }
+.project-detail__head { display: flex; align-items: center; gap: 11px; padding: 8px 2px 14px; }
+.project-detail__avatar { display: block; width: 50px; height: 50px; flex: 0 0 50px; overflow: hidden; border-radius: 15px; background: var(--atlas-sage-soft); color: var(--atlas-sage); font-size: 20px; font-weight: 800; }
+.project-detail__avatar--fallback { display: flex; align-items: center; justify-content: center; }
 .project-detail__title-group { min-width: 0; flex: 1; }
-.project-detail__title { display: block; color: var(--atlas-ink); font-size: 22px; font-weight: 800; }
+.project-detail__title { display: block; color: var(--atlas-ink); font-size: 27px; line-height: 1.3; font-weight: 800; }
 .project-detail__owner { display: block; margin-top: 4px; color: var(--atlas-muted); font-size: 10px; }
-.project-detail__manage, .project-detail__follow { height: 34px; margin: 0; padding: 0 11px; border-radius: 11px; background: var(--atlas-accent); color: white; font-size: 11px; line-height: 34px; }
+.project-detail__manage { display: flex; width: auto; height: 30px; flex: 0 0 auto; align-items: center; justify-content: center; box-sizing: border-box; padding: 0 8px; border-radius: 10px; background: white; color: var(--atlas-ink); font-size: 10px; line-height: 30px; white-space: nowrap; }
+.project-detail__follow { height: 32px; margin: 0; padding: 0 11px; border-radius: 999px; background: var(--atlas-accent); color: white; font-size: 10px; line-height: 32px; }
 .project-detail__follow--active { background: var(--atlas-sage-soft); color: var(--atlas-sage); }
 .project-detail__description { display: block; padding: 0 2px; color: var(--atlas-secondary); font-size: 12px; line-height: 1.7; }
-.project-detail__stats { display: flex; margin-top: 17px; padding: 14px 6px; border-radius: 16px; background: white; }
+.project-detail__stats { display: flex; gap: 21px; margin-top: 17px; padding: 3px 2px 14px; }
 .project-detail__stat { flex: 1; text-align: center; }
 .project-detail__stat text:first-child { display: block; color: var(--atlas-ink); font-size: 19px; font-weight: 800; }
 .project-detail__stat text:last-child { display: block; margin-top: 3px; color: var(--atlas-muted); font-size: 10px; }
@@ -26,13 +28,12 @@
 .project-detail__invite-result { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--atlas-line); color: var(--atlas-ink); font-size: 11px; }
 .project-detail__members { overflow: hidden; border-radius: 15px; background: white; }
 .project-detail__member { display: flex; min-height: 58px; align-items: center; gap: 9px; padding: 8px 11px; border-bottom: 1px solid var(--atlas-line); }
-.project-detail__member-avatar { display: flex; width: 34px; height: 34px; align-items: center; justify-content: center; border-radius: 11px; background: var(--atlas-accent-soft); color: var(--atlas-accent); font-size: 13px; font-weight: 800; }
+.project-detail__member-avatar { display: block; width: 36px; height: 36px; flex: 0 0 36px; overflow: hidden; border-radius: 11px; background: var(--atlas-accent-soft); color: var(--atlas-accent); font-size: 13px; font-weight: 800; }
+.project-detail__member-avatar--fallback { display: flex; align-items: center; justify-content: center; }
 .project-detail__member-copy { min-width: 0; flex: 1; }
 .project-detail__member-copy text:first-child { display: block; color: var(--atlas-ink); font-size: 12px; font-weight: 700; }
 .project-detail__member-copy text:last-child { display: block; margin-top: 3px; color: var(--atlas-muted); font-size: 9px; }
 .project-detail__role-actions { display: flex; max-width: 150px; justify-content: flex-end; flex-wrap: wrap; gap: 5px; }
 .project-detail__role-actions text { padding: 4px 6px; border-radius: 7px; background: var(--atlas-sage-soft); color: var(--atlas-sage); font-size: 9px; }
-.project-detail__content { margin-bottom: 8px; padding: 13px; border-radius: 13px; background: white; }
-.project-detail__content text:first-child { display: block; color: var(--atlas-ink); font-size: 13px; font-weight: 700; }
-.project-detail__content text:last-child { display: block; margin-top: 5px; color: var(--atlas-muted); font-size: 9px; }
+.project-detail__contents { margin: 0 4px; }
 .project-detail__empty { padding: 22px; border-radius: 14px; background: rgba(255,255,255,.55); color: var(--atlas-muted); font-size: 11px; text-align: center; }

@@ -1,4 +1,4 @@
-import { Button, Image, Input, Text, Textarea, View } from '@tarojs/components';
+import { Button, Image, Text, View } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useEffect, useState } from 'react';
 
@@ -6,16 +6,14 @@ import { BottomNav } from '../../components/bottom-nav';
 import { useCollectionStore } from '../../state/collection-store';
 import { useContentStore } from '../../state/content-store';
 import { useSessionStore } from '../../state/session-store';
-import { ensureWechatPrivacyAuthorization } from '../../privacy/privacy-consent';
 import './index.css';
+
+type ProfileFilter = 'personal' | 'project' | 'liked' | 'favorite' | 'comment';
 
 export default function ProfilePage() {
   const session = useSessionStore();
   const content = useContentStore();
   const collections = useCollectionStore();
-  const [editing, setEditing] = useState(false);
-  const [displayName, setDisplayName] = useState('');
-  const [bio, setBio] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const user = session.session?.user ?? null;
 
@@ -25,54 +23,33 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!user) return;
-    setDisplayName(user.displayName);
-    setBio(user.bio);
     setAvatarUrl(String(Taro.getStorageSync(`atlas:miniprogram:avatar:${user.id}`) || user.avatarUrl || ''));
     if (!content.hydrated) void content.activateAccount(user.id);
     void collections.hydrate();
   }, [user?.id]);
 
   const personalCollections = user ? collections.collections.filter((collection) => collection.ownerName === user.displayName) : [];
+  const authoredItems = user ? content.items.filter((item) => item.authorName === user.displayName) : [];
+  const personalItems = authoredItems.filter((item) => item.teamNames.every((team) => team === '无'));
+  const projectItems = authoredItems.filter((item) => item.teamNames.some((team) => team !== '无'));
+  const likedItems = content.items.filter((item) => item.isLiked);
+  const favoriteItems = content.items.filter((item) => item.isFavorite);
+  const commentCount = content.items.reduce((total, item) => total + item.commentCount, 0);
+
+  const openProfile = (filter: ProfileFilter) => {
+    if (!user) {
+      void session.login();
+      return;
+    }
+    void Taro.navigateTo({ url: `/pages/users/detail?id=${encodeURIComponent(user.id)}&filter=${filter}` });
+  };
 
   const openIdentity = () => {
     if (!user) {
       void session.login();
       return;
     }
-    setDisplayName(user.displayName);
-    setBio(user.bio);
-    setAvatarUrl(String(Taro.getStorageSync(`atlas:miniprogram:avatar:${user.id}`) || user.avatarUrl || ''));
-    setEditing(true);
-  };
-
-  const chooseAvatar = async () => {
-    try {
-      if (!await ensureWechatPrivacyAuthorization()) return;
-      const result = await Taro.chooseMedia({ count: 1, mediaType: ['image'], sourceType: ['album', 'camera'] });
-      const file = result.tempFiles[0];
-      if (!file?.tempFilePath) return;
-      try {
-        const saved = await Taro.saveFile({ tempFilePath: file.tempFilePath });
-        if ('savedFilePath' in saved && typeof saved.savedFilePath === 'string') setAvatarUrl(saved.savedFilePath);
-        else setAvatarUrl(file.tempFilePath);
-      } catch {
-        setAvatarUrl(file.tempFilePath);
-      }
-    } catch (error) {
-      const message = error && typeof error === 'object' && 'errMsg' in error && typeof error.errMsg === 'string' ? error.errMsg : '头像选择失败';
-      if (!/cancel/i.test(message)) await Taro.showToast({ title: message, icon: 'none' });
-    }
-  };
-
-  const save = async () => {
-    try {
-      await session.updateProfile({ displayName, bio });
-      if (user) Taro.setStorageSync(`atlas:miniprogram:avatar:${user.id}`, avatarUrl);
-      setEditing(false);
-      await Taro.showToast({ title: '资料已保存', icon: 'success' });
-    } catch (error) {
-      await Taro.showToast({ title: error instanceof Error ? error.message : '保存失败', icon: 'none' });
-    }
+    void Taro.navigateTo({ url: '/pages/profile/edit' });
   };
 
   return (
@@ -88,9 +65,20 @@ export default function ProfilePage() {
         <Text className="profile__chevron">›</Text>
       </View>
 
+      <View className="profile__stats">
+        <Text className="profile__stats-title">内容统计</Text>
+        <View className="profile__stats-row">
+          <Stat label="个人" value={personalItems.length} onClick={() => openProfile('personal')} />
+          <Stat label="项目" value={projectItems.length} onClick={() => openProfile('project')} />
+          <Stat label="喜欢" value={likedItems.length} onClick={() => openProfile('liked')} />
+          <Stat label="收藏" value={favoriteItems.length} onClick={() => openProfile('favorite')} />
+          <Stat label="评论" value={commentCount} onClick={() => openProfile('comment')} />
+        </View>
+      </View>
+
       <View className="profile__menu">
-        <MenuRow icon="◉" label="团队项目" detail="邀请成员一起整理" onClick={() => void Taro.navigateTo({ url: '/pages/projects/index' })} />
         <MenuRow icon="▣" label="个人合集" detail={`${personalCollections.length} 个合集，持续更新同类内容`} onClick={() => void Taro.navigateTo({ url: '/pages/collections/index' })} />
+        <MenuRow icon="◉" label="团队项目" detail="邀请成员一起整理" onClick={() => void Taro.navigateTo({ url: '/pages/projects/index' })} />
         <MenuRow icon="i" label="关于与隐私" detail="权限说明与版本信息" onClick={() => void Taro.navigateTo({ url: '/pages/about/index' })} />
       </View>
 
@@ -105,30 +93,13 @@ export default function ProfilePage() {
 
       {session.error ? <View className="profile__error">{session.error}</View> : null}
 
-      {editing && user ? (
-        <View className="profile__modal" onClick={() => setEditing(false)}>
-          <View className="profile__modal-card" onClick={(event) => event.stopPropagation()}>
-            <View className="profile__modal-header">
-              <Text className="profile__modal-title">编辑个人资料</Text>
-              <Text className="profile__modal-close" onClick={() => setEditing(false)}>×</Text>
-            </View>
-            <View className="profile__edit-avatar" onClick={() => void chooseAvatar()}>{avatarUrl ? <Image className="profile__edit-avatar-image" mode="aspectFill" src={avatarUrl} /> : displayName.slice(0, 1) || '我'}<Text>修改头像</Text></View>
-            <Text className="profile__label">显示名称</Text>
-            <Input maxlength={40} onInput={(event) => setDisplayName(event.detail.value)} placeholder="输入名称" value={displayName} />
-            <Text className="profile__label">个人简介</Text>
-            <Textarea maxlength={160} onInput={(event) => setBio(event.detail.value)} placeholder="介绍一下自己" value={bio} />
-            <View className="profile__modal-actions">
-              <Button className="profile__cancel" onClick={() => setEditing(false)}>取消</Button>
-              <Button className="profile__save" disabled={!displayName.trim()} loading={session.loading} onClick={() => void save()}>保存</Button>
-            </View>
-            <Text className="profile__logout" onClick={() => void session.logout().then(() => { setEditing(false); void Taro.reLaunch({ url: '/pages/index/index' }); })}>退出登录</Text>
-          </View>
-        </View>
-      ) : null}
-
       <BottomNav active="me" />
     </View>
   );
+}
+
+function Stat({ label, value, onClick }: { label: string; value: number; onClick: () => void }) {
+  return <View className="profile__stat" hoverClass="profile__pressed" onClick={onClick}><Text>{value}</Text><Text>{label}</Text></View>;
 }
 
 function MenuRow({ icon, label, detail, onClick }: { icon: string; label: string; detail: string; onClick: () => void }) {

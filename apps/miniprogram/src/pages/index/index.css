@@ -11,11 +11,24 @@
 .library__conflict-copy { display: block; max-width: 145px; margin-top: 3px; overflow: hidden; color: var(--atlas-secondary); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
 .library__conflict-actions { display: flex; gap: 6px; }
 .library__conflict-actions button { height: 29px; margin: 0; padding: 0 8px; border-radius: 8px; background: white; color: #9a601b; font-size: 10px; line-height: 29px; }
-.library__search { display: flex; height: 46px; box-sizing: border-box; align-items: center; gap: 8px; padding: 0 14px; border: 1px solid var(--atlas-line); border-radius: 15px; background: white; }
+.library__search-row { display: flex; align-items: center; gap: 8px; }
+.library__city-button { display: flex; width: 76px; height: 46px; box-sizing: border-box; align-items: center; justify-content: center; gap: 3px; padding: 0 7px; border-radius: 15px; background: #e7eff4; color: var(--atlas-blue); }
+.library__city-button--active { background: var(--atlas-blue); color: white; }
+.library__city-icon, .library__city-option-icon { position: relative; width: 14px; height: 17px; flex: 0 0 14px; box-sizing: border-box; border: 2px solid currentColor; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); }
+.library__city-icon::after, .library__city-option-icon::after { position: absolute; top: 3px; left: 3px; width: 4px; height: 4px; border-radius: 50%; background: currentColor; content: ''; }
+.library__city-label { max-width: 52px; overflow: hidden; font-size: 11px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.library__search { display: flex; min-width: 0; flex: 1; height: 46px; box-sizing: border-box; align-items: center; gap: 8px; padding: 0 14px; border: 1px solid var(--atlas-line); border-radius: 15px; background: white; }
 .library__search input { min-width: 0; flex: 1; color: var(--atlas-ink); font-size: 14px; }
 .library__search-icon { color: var(--atlas-muted); font-size: 22px; }
 .library__placeholder { color: var(--atlas-muted); }
 .library__clear { color: var(--atlas-accent); font-size: 12px; }
+.library__tag-section { margin-top: 14px; }
+.library__tag-clear-row { padding: 0 2px 5px; text-align: right; }
+.library__tag-clear { color: var(--atlas-accent); font-size: 11px; }
+.library__tag-scroll { width: calc(100% + 40px); margin: 0 -20px; white-space: nowrap; }
+.library__tags { display: inline-flex; gap: 8px; padding: 9px 20px 4px; }
+.library__tag { padding: 8px 12px; border-radius: 999px; background: white; color: var(--atlas-sage); font-size: 12px; }
+.library__tag--active { background: var(--atlas-sage); color: white; }
 .library__filter-scroll { width: calc(100% + 40px); margin: 16px -20px 0; white-space: nowrap; }
 .library__filters { display: inline-flex; gap: 8px; padding: 0 20px 4px; }
 .library__filter { padding: 8px 14px; border-radius: 999px; background: white; color: var(--atlas-secondary); font-size: 13px; }
@@ -29,3 +42,16 @@
 .library__empty-title { margin-top: 14px; color: var(--atlas-ink); font-size: 18px; font-weight: 800; }
 .library__empty-copy { margin-top: 8px; font-size: 13px; line-height: 1.7; }
 .library__empty-action { height: 42px; margin-top: 20px; padding: 0 18px; border-radius: 14px; background: var(--atlas-accent); color: white; font-size: 14px; line-height: 42px; }
+.library__city-backdrop { position: fixed; z-index: 50; top: 0; right: 0; bottom: 0; left: 0; display: flex; align-items: flex-end; background: rgba(20, 20, 16, .42); }
+.library__city-sheet { display: flex; width: 100%; max-height: 72%; box-sizing: border-box; flex-direction: column; padding: 20px 20px calc(20px + env(safe-area-inset-bottom)); border-radius: 24px 24px 0 0; background: var(--atlas-card); }
+.library__city-header { display: flex; align-items: flex-start; justify-content: space-between; }
+.library__city-header-actions { display: flex; align-items: center; gap: 12px; }
+.library__city-clear-inline { color: var(--atlas-accent); font-size: 12px; }
+.library__city-title { display: block; color: var(--atlas-ink); font-size: 20px; font-weight: 800; }
+.library__city-hint { display: block; margin-top: 5px; color: var(--atlas-muted); font-size: 11px; }
+.library__city-close { padding: 0 3px; color: var(--atlas-muted); font-size: 26px; line-height: 22px; }
+.library__city-options { min-height: 0; max-height: 320px; margin-top: 16px; }
+.library__city-option { display: flex; min-height: 42px; box-sizing: border-box; align-items: center; gap: 8px; margin-bottom: 8px; padding: 0 12px; border-radius: 14px; background: var(--atlas-paper); color: var(--atlas-blue); }
+.library__city-option--active { background: var(--atlas-blue); color: white; }
+.library__city-option-label { flex: 1; font-size: 13px; font-weight: 700; }
+.library__city-check { font-size: 16px; font-weight: 800; }
