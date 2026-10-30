@@ -1,6 +1,14 @@
 import { defineConfig, type UserConfigExport } from '@tarojs/cli';
 import path from 'node:path';
 
+const miniEnvironment = process.env.TARO_APP_ENV ?? 'development';
+const miniApiBaseUrl = process.env.TARO_APP_API_BASE_URL
+  ?? (miniEnvironment === 'development' ? 'http://127.0.0.1:4000/api/v1' : '');
+
+if (miniEnvironment !== 'development' && !/^https:\/\//.test(miniApiBaseUrl)) {
+  throw new Error('非开发小程序构建必须配置 HTTPS 格式的 TARO_APP_API_BASE_URL');
+}
+
 const config: UserConfigExport = {
   projectName: 'atlas-miniprogram',
   date: '2026-08-23',
@@ -29,9 +37,9 @@ const config: UserConfigExport = {
   cache: { enable: false },
   plugins: [],
   env: {
-    TARO_APP_API_BASE_URL: JSON.stringify(process.env.TARO_APP_API_BASE_URL ?? 'http://127.0.0.1:4000/api/v1'),
-    TARO_APP_ENV: JSON.stringify(process.env.TARO_APP_ENV ?? 'development'),
-    TARO_APP_RELEASE_VERSION: JSON.stringify(process.env.TARO_APP_RELEASE_VERSION ?? '0.0.1'),
+    TARO_APP_API_BASE_URL: JSON.stringify(miniApiBaseUrl),
+    TARO_APP_ENV: JSON.stringify(miniEnvironment),
+    TARO_APP_RELEASE_VERSION: JSON.stringify(process.env.TARO_APP_RELEASE_VERSION ?? '0.0.2'),
     TARO_APP_PRIVACY_CONTACT: JSON.stringify(process.env.TARO_APP_PRIVACY_CONTACT ?? ''),
   },
   defineConstants: {},

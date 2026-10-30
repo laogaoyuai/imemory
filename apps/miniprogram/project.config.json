@@ -4,7 +4,7 @@
   "description": "拾光内容库微信小程序",
   "appid": "wxac5afa568790b0c5",
   "setting": {
-    "urlCheck": false,
+    "urlCheck": true,
     "es6": true,
     "postcss": true,
     "minified": true,

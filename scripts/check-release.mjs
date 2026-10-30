@@ -13,6 +13,7 @@ check('Node.js 符合仓库最低版本', compareVersions(process.versions.node,
 check('已替换真实小程序 AppID', project.appid && project.appid !== 'touristappid', project.appid || '未配置');
 check('开发者工具开启合法域名校验', project.setting?.urlCheck === true, `urlCheck=${String(project.setting?.urlCheck)}`);
 check('使用 production 小程序环境', process.env.TARO_APP_ENV === 'production', process.env.TARO_APP_ENV || '未配置');
+check('小程序发布版本为 0.0.2', process.env.TARO_APP_RELEASE_VERSION === '0.0.2', process.env.TARO_APP_RELEASE_VERSION || '未配置');
 check('生产 API 使用 HTTPS', /^https:\/\//.test(process.env.TARO_APP_API_BASE_URL || ''), process.env.TARO_APP_API_BASE_URL || '未配置');
 check('已配置隐私联系人', Boolean(process.env.TARO_APP_PRIVACY_CONTACT?.trim()), process.env.TARO_APP_PRIVACY_CONTACT ? '已配置' : '未配置');
 check('API 明确启用微信内容安全', process.env.CONTENT_SECURITY_MODE === 'wechat', process.env.CONTENT_SECURITY_MODE || '未配置');

@@ -7,7 +7,7 @@ export class HealthController {
     return {
       status: 'ok',
       service: 'atlas-api',
-      version: '0.0.1',
+      version: '0.0.2',
       time: new Date().toISOString(),
     };
   }

@@ -1,6 +1,6 @@
 {
   "name": "@atlas/miniprogram",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "scripts": {
     "dev:weapp": "taro build --type weapp --watch --no-check",

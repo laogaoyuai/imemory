@@ -1,6 +1,6 @@
 # 架构与演进路线
 
-## 0.0.1 边界
+## 0.0.2 边界
 
 首版只交付 iOS 本地内容库，不引入账号、云端同步或公开内容社区。这让媒体导入、离线浏览和内容组织可以先形成完整闭环，同时不把平台 API 泄漏进共享核心。
 
@@ -60,7 +60,7 @@ REST Controller → Application Service → Repository → PostgreSQL
 
 ## 多平台里程碑
 
-1. `0.0.1` iOS：本地发布、媒体与文件、搜索筛选、收藏。
+1. `0.0.2` iOS：本地发布、媒体与文件、搜索筛选、收藏。
 2. Android：复用 `@atlas/core` 与大部分 React Native UI，补齐权限、文件 URI 和返回键适配。
 3. 微信小程序：Taro 适配层，小程序存储 + 云端同步，当前优先开发至生产版本。
 4. PC Web：Next.js App Router + shadcn/ui，Dexie.js 实现 IndexedDB Repository；服务端渲染只覆盖公开内容页。

@@ -1,6 +1,6 @@
 export const releaseConfig = {
   environment: process.env.TARO_APP_ENV ?? 'development',
-  version: process.env.TARO_APP_RELEASE_VERSION ?? '0.0.1',
+  version: process.env.TARO_APP_RELEASE_VERSION ?? '0.0.2',
   apiBaseUrl: process.env.TARO_APP_API_BASE_URL ?? 'http://127.0.0.1:4000/api/v1',
   privacyContact: process.env.TARO_APP_PRIVACY_CONTACT ?? '',
 } as const;

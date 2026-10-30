@@ -17,6 +17,7 @@
     "check:release:strict": "node scripts/check-release.mjs --strict",
     "db:generate": "pnpm --filter @atlas/api generate",
     "db:migrate": "pnpm --filter @atlas/api exec prisma migrate dev",
+    "db:migrate:deploy": "pnpm --filter @atlas/api exec prisma migrate deploy",
     "typecheck": "pnpm --filter @atlas/core typecheck && pnpm --filter @atlas/contracts typecheck && pnpm --filter @atlas/api-client typecheck && pnpm --filter @atlas/sync-engine typecheck && pnpm --filter @atlas/ios typecheck && pnpm --filter @atlas/miniprogram typecheck && pnpm --filter @atlas/api typecheck",
     "test": "pnpm --filter @atlas/core test && pnpm --filter @atlas/sync-engine test && pnpm --filter @atlas/miniprogram test && pnpm --filter @atlas/api test",
     "lint": "pnpm -r --if-present lint"

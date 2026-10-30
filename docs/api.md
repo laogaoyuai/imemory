@@ -1,4 +1,4 @@
-# Atlas API 0.0.1
+# Atlas API 0.0.2
 
 API 位于 `apps/api`，使用 NestJS 11、Prisma 7、PostgreSQL 和 S3 兼容对象存储。所有业务接口统一使用 `/api/v1` 前缀。
 
@@ -100,6 +100,16 @@ postgresql://atlas:atlas@127.0.0.1:5432/atlas?schema=public
 
 ## 生产配置要求
 
+生产部署只执行已经提交到仓库的前向 Migration，不使用 `prisma migrate dev` 或 `prisma db push`：
+
+```bash
+pnpm build:api
+pnpm db:migrate:deploy
+pnpm --filter @atlas/api start
+```
+
+Migration 应在应用滚动更新前执行，并且不能在应用启动时自动修改数据库。
+
 - `JWT_SECRET` 至少 32 字符，并通过密钥服务注入。
 - 必须配置真实 `WECHAT_APP_ID`、`WECHAT_APP_SECRET`。
 - 必须设置 `STORAGE_MODE=s3` 及 bucket、region、endpoint 和凭证。
@@ -109,4 +119,3 @@ postgresql://atlas:atlas@127.0.0.1:5432/atlas?schema=public
 - `TRUST_PROXY` 只能在受控反向代理后开启；API 会回传 `X-Request-Id` 并在生产环境记录结构化访问日志。
 - API 域名、上传域名和下载域名需要加入微信小程序合法域名。
 - 预签名上传完成后仍需增加对象存在性确认、MIME 魔数检查、内容安全审核和恶意文件扫描。
-- Migration 应由部署流程执行，不能在应用启动时自动修改数据库。

@@ -1,6 +1,6 @@
 # 拾光内容库
 
-跨平台内容库 Monorepo。目前包含 iOS `0.0.2` 基线和正在开发的微信小程序 `0.0.1`。两个客户端复用平台无关的 TypeScript 领域模型与应用服务，并分别实现 UI、路由、媒体和持久化适配。
+跨平台内容库 Monorepo。目前包含 iOS `0.0.2` 基线和微信小程序 `0.0.2` 测试版本。两个客户端复用平台无关的 TypeScript 领域模型与应用服务，并分别实现 UI、路由、媒体和持久化适配。
 
 当前发布策略是优先让微信小程序达到生产可用，随后扩展多端；长期会再过渡到 iOS 优先。客户端版本独立演进，跨端完成度以 `docs/capability-matrix.md` 为准。
 
@@ -32,6 +32,10 @@ pnpm build:mini
 pnpm build:api
 pnpm check:release
 ```
+
+## 部署
+
+完整的 PostgreSQL、对象存储、API 和微信小程序部署步骤见 [部署指南](docs/deployment.md)。当前正式版本为 `v0.0.2`。
 
 第一次运行会由 Expo 启动 iOS Simulator。需要生成原生工程或使用自定义原生构建时，可以在 `apps/ios` 中执行 `pnpm exec expo prebuild --platform ios`。
 
